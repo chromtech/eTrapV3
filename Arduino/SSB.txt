@@ -1,0 +1,48 @@
+
+
+FW History See CmdMessenger/SSB.txt
+
+FW 1.9:	add IGNORE_GC_PREPARE  and the command from PC: ignoreGCPrepare   NOT RUNNING. USE 1.8
+
+FW 1.8:  fakes GC_Prepare !
+
+
+FW 1.7:
+started 13.11.15
+released 17.11.
+
+FW 1.4.
+	- add	Hardware Simulation for using naked Arduino
+			Can also be used WITH existing Hardware.
+			
+			FAKE_TEMPERATURE_AND_HEATERS with fake Temperature up and down  for Hardware Simulation
+			No PWM will be send out
+			Temperature will go up and down according to the goalTemperature
+			Trap_COOL will never be sent out		
+
+	- add	FAKE_SYNC_SIGNALS
+			will run a 5 seconds delay instead of waiting for the signal (gc-prepare and gc-start)
+
+	- add	SINGLE_RUN  false=Run cycle at startup, true=do not run cycle, but use Standby Temperature
+
+	- need flags: Incubation Time, IsInSequence, IsInSingleRun
+
+
+FW 1.3:		
+started 4.11.2015
+released 12.11.  Eichler
+
+	- add Cryo Timeout Ignore 
+	- change Timer1  to a global Timer that counts Milliseconds  (no more use of millis()...)
+
+	fixed Bugs:
+	001	PWM: duty_cycle from 0-255  chg. to 200-2000 Millis_Bang
+	002	 was type cast problem
+
+
+
+
+3.11.2015	FW 1.1	
+	002		Start_Timer,  Wait_Timer  not ok...
+	001		PWM too fast: killing Power Supply
+

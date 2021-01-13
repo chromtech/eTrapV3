@@ -1,0 +1,14 @@
+﻿Build started 12/12/2016 10:32:53 AM.
+     1>Project "C:\Arduino projects\CmdMessenger\CmdMessenger\Examples\eTrap for V 2.3.1\eTrap.vcxproj" on node 2 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "Debug\eTrap.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "Debug\eTrap.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       FinalizeBuildStatus:
+         Deleting file "Debug\eTrap.unsuccessfulbuild".
+         Touching "Debug\eTrap.lastbuildstate".
+     1>Done Building Project "C:\Arduino projects\CmdMessenger\CmdMessenger\Examples\eTrap for V 2.3.1\eTrap.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.15
