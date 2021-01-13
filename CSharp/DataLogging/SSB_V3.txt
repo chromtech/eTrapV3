@@ -1,9 +1,9 @@
-﻿SSB  18.9.15
+﻿SSB V3 13.1.2021
 
 C:\ Arduino projects\CmdMessenger\CmdMessenger\CSharp\CmdMessenger.sln
 C:\ Arduino projects\CmdMessenger\CmdMessenger\Examples\Data Logging\DataLogging.sln  bzw. DataLogging.sln
 
-D O N E
+
 - Datalogging ein-/ausschalten
 - Temperatur plotten
 		LM35 TempSensor view from flat side, left to right
@@ -22,15 +22,20 @@ Analog In 7:   Über Spannungsteiler: VIn > 33k > A7 > 10k > GND
 
 - PID calculations  Im Prinzip OK.  PI Werte mit endgültiger Hardware anpassen
 
-- PWM on D3 (Pin 4 GND  Pin 6 D3)
+-( PWM on D3 (Pin 4 GND  Pin 6 D3)	OBS V3 )
+- PWM on D4							Heizen Impuls
+- PWM on D5							Kühlen Impuls
+
 
 PT1000 Konverter Anschlüsse:
 	+12V:					+12 / GND
 	Benutzung Eingang S1:	MUX A und MUX B auf GND legen (=LOW)
 	Anschluß PT1000:		S1 / GND
 	Ausgang 0-6V:			Out / GND
-
 	Alle GND sind miteinander verbunden.
+
+	V3: 
+	D6:  MUX zum Umschalten der Kanäle S1 und ??
 
 Arduino Eingang für Analog 0-6 V
 	A7	= pin 19  (Beschriftung A0)		Yellow
@@ -47,7 +52,6 @@ PT1000 Kalibrierung:
 	-30  = 882
 	-20  = 921
 
-
 	0.167 V		Output mit -30.059 C Wiederstand		= 0.882 kOhm
 	3.06  V		Output mit 347.95  C Wiederstand		= 3.29  kOhm
 
@@ -60,7 +64,7 @@ TTL connections:
 
 TTL connections since V2.0
 	Prepare_2		=	D8 IN				Active State: OFF = TTL low		PAL TTL OUT 3 (pin 6)
-
+	
 	Unused_IN_2		=	D7 IN												PAL TTL OUT 2 (pin 5)
 	Unused_IN_1		=	D6 IN												PAL TTL OUT 1 (pin 4)	
 	Unused_OUT_3	=	D5 OUT												PAL TTL IN 3 (pin 3)
@@ -71,6 +75,7 @@ TTL connections since V2.0
 LED : D13 OUT
 
 
+eTrap Cycle:
 eTrap Program:  V 2.7 / 2.8
 Macro v 6.0
 // Cycle version 6	Line 4 added:  Wait for Prepare_2 Time.  If Prepare_2 Time >0: Do NOT run Line 5 !
@@ -97,8 +102,7 @@ Macro v 6.0
 		17;		ATOM[Line] = END_OF_CYCLE;		PARM1[Line] = SINGLE_RUN_MODE;		PARM2[Line] = 0;		PARM3[Line] = 0;		// 17 18 End of Cycle AND SINGLE_RUN_MODE-flag in PARM1 default=true
 
 
-
-				
+Versions:				
 version 2.8.2  for eTrap 2.8.2
 	19.10.2020	- Add STOP command from MH:
 					... sethook "IC_PostAcq", "eT_Abort" in User.mac
@@ -117,6 +121,7 @@ version 2.8.2  for eTrap 2.8.2
 			- On Startup: Check if already runnning
 			- Add logging to MSD Logfile
 			- Add writing Parameters to acqmeth.txt  or  'methname'.INF
+
 version 2.8.3  for eTrap 2.8.2
 	2.12.2020	- removed bug: Not Writing Config File !!!
 				- each change of a configuration (Ignore GC Prep, Ingnore Prepare_2) will be saved in Config file immediately
@@ -126,6 +131,7 @@ version 2.8.3  for eTrap 2.8.2
 Version 3.0
 	13.1.2021  switch SSB:  old: SSB.txt  NEW SSB_V3.txt
 	-	chg Version to 3.0.1
+	-	Add D6 MUX zum Umschalten der Tempkanäle Test: Umschaltung 1 x pro sekunde...
 
 
 

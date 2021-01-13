@@ -15,6 +15,12 @@ int subFWVersion = 0;
 
 const int CycleVersion = 5;
 
+// HW version:  
+//	2 = standard 2.8    Ralf Controler	+	CT eTrap V1
+//  3 = V3				CT controler	+	CT eTrap V1
+int HWVersion = 2;				// Default. Check real version at Startup
+int HWVersion_TestStep = 0;		// Used in Do_CheckHardwareVersions
+
 // Varian GC
 const bool IS_BRUKER = false;  // FW 2.x. True for eTrap_FW_2.x_BrukerVarianGC.hex  flase for eTrap_FW_2.x.hex
 
@@ -33,8 +39,6 @@ CmdMessenger cmdMessenger = CmdMessenger(Serial);
 
 
 volatile int EEaddress = 0;
-
-
 int _newInt			=	0;
 
 // Hardware Security Settings
@@ -70,6 +74,7 @@ float currentHeatRate			= 0;	// calced from lastHeatRateTemp / currentHeatRateTe
 float rateToSwitchOnIntegral	= 0;	// If rate is lower :  Swicth on the Integral
 
 // Update intervals inside loop  100 = 0.1 second interval, 10 Hz frequency
+const unsigned long interval_HWTest = 1000;
 const unsigned long interval_Temperature = 50;	// was 100  0.8 sec read Temperature and Security Issues
 const unsigned long interval_Htr = 50;			// was 100  0.8 sec update PID and set 
 const unsigned long interval_Average = 5;		// 5 msec read Analog In 1 for average
@@ -94,9 +99,7 @@ unsigned long HeaterBang_max = 300;
 
 
 // Data logging Update
-//bool LoggingData                   = false;
 long startLoggingMillis            = 0;
-//unsigned long previousMillis_Logging = 0;		// unused
 
 
 // Input voltage and update
@@ -122,6 +125,9 @@ float TempCorrectionSlope_HiTemp	= 1;	// curr. unused
 const int PWMPin					= 3;	// D3 OUT = Pin 4 ?
 int HeaterIsOn						= 0;
 unsigned long Millis_Htr = 0;
+
+// StartUp HW Tests Update
+unsigned long Millis_HWTest = 0;
 
 //Cycle Update
 unsigned long Millis_Cycle = 0;
@@ -177,13 +183,13 @@ const int pin_Prepare_2				= 8;	// D8 IN = Pin 11   >  PAL TTL OUT 3 (pin 6)
 const int dir_Prepare_2				= INPUT;
 	  int state_Prepare_2			= OFF;
 
-// other Pins connected to PAL Plug
+// other Pins 
 const int pin_Unused_IN_2			= 7;	// D7 IN = Pin 5   >  PAL TTL OUT 2 (pin 5)
 const int dir_Unused_IN_2			= INPUT;
 	  int state_Unused_IN_2			= OFF;
-const int pin_Unused_IN_1			= 6;	// D6 IN = Pin 9   >  PAL TTL OUT 2 (pin 4)
-const int dir_Unused_IN_1			= INPUT;
-	  int state_Unused_IN_1			= OFF;
+const int pin_MuxTemp				= 6;	// D6 OUT = Pin 9   >  MUX Temp
+	  int dir_MuxTemp				= OUTPUT;
+	  int state_MuxTemp				= OFF;
 
 const int pin_Unused_OUT_3			= 5;	// D5 OUT = Pin 8   >  PAL TTL IN 3 (pin 3)
 const int dir_Unused_OUT_3			= OUTPUT;
@@ -205,8 +211,6 @@ const int dir_Unused_OUT_1			= OUTPUT;
 	int PARM2[max_Lines];				// Parameter 2 of an atom
 	int PARM3[max_Lines];				// Parameter 3 of an atom
 	 
-
-
 
 //	Cycle Atoms
 	enum ATOM
@@ -259,7 +263,6 @@ const int dir_Unused_OUT_1			= OUTPUT;
 // Temperature and Heaters: No PWM will be send out
 //							Temperature will go up and down according to the goalTemperature
 	bool fakeTemperatureRising				= true;
-	//bool fakeTemperatureFalling				= false;
 
 // Sync Signals	
 	const int fakeSyncSignals_timer			= 4;			// This is the TIMER, not the time !!!
@@ -377,6 +380,50 @@ void OnArduinoReady()
 {  cmdMessenger.sendCmd(kAcknowledge,"Chromtech Controler is ready");
 }
 
+
+void Do_CheckHardwareVersions()
+{
+	HWVersion_TestStep++;
+
+	cmdMessenger.sendCmd(0, currentTemperature);
+	cmdMessenger.sendCmd(0, " --- ");
+
+
+	switch (HWVersion_TestStep)
+	{
+	case 1:
+		// 1. Check, if Temp can be MUX'ed
+		dir_MuxTemp = OUTPUT;
+		pinMode(pin_MuxTemp, dir_MuxTemp);
+		set_Pin_MuxTemp(LOW);
+		cmdMessenger.sendCmd(0, "HWTest 1 Mux LOW");
+		break;
+	case 2:
+		set_Pin_MuxTemp(HIGH);
+		cmdMessenger.sendCmd(0, "HWTest 2 Mux HIGH");
+		break;
+	
+
+		default:
+			HWVersion_TestStep = 100;
+		break;
+	}
+	
+	
+
+
+	
+}
+
+void set_Pin_MuxTemp(int state)
+{
+	//pinMode(pin_MuxTemp, dir_MuxTemp);
+	digitalWrite(pin_MuxTemp, state);
+	state_MuxTemp = state;
+}
+
+// ################################
+
 // S E T U P and L O O P
 void setup() 
 {
@@ -411,11 +458,9 @@ void setup()
 		set_pin_GC_Ready(OFF);					// Varian GC: Ready for PAL
 	}
 	else
-	{
-		
+	{		
 		set_pin_GC_Ready(ON);	// change to Input state
 	}
-
 
 
 	pinMode(pin_TRAP_Cool, dir_TRAP_Cool);		// Trap Cooling 
@@ -471,6 +516,13 @@ void loop()
 {
 	// Process incoming serial data, and perform callbacks
 	cmdMessenger.feedinSerialData();
+
+	// Do HW Test
+	if (Millis_HWTest > interval_HWTest)
+	{
+		Do_CheckHardwareVersions();
+		Millis_HWTest = 0;
+	}
 
 	// Do average AnalogIn 1 and In 7
 	if ( Millis_Average > interval_Average)
@@ -558,9 +610,7 @@ void loop()
 		{	
 			set_pin_TRAP_Cool_and_Consequences(OFF);	// remove the CoolTrap
 			set_pin_GC_Ready(OFF);						// Block GC from getting ready	// VarianGC: READY for PAL Low (is already low)
-			//STATUS_CRYO_TIMEOUT				= false;
 			_stopCycle();
-			//STATUS_CYCLE_RESTART_PLEASE		= true;
 			MESSAGE_CRYO_TIMEOUT_TO_PC		= true;
 		}
 		else
@@ -568,8 +618,7 @@ void loop()
 			if (STATUS_SYSTEM_IS_SECURE)  
 				Do_WorkOnCycle();
 			else
-				{	
-					
+				{						
 					set_pin_TRAP_Cool_and_Consequences(OFF);	// minimum Security for now
 					_stopCycle();
 				}
@@ -579,7 +628,12 @@ void loop()
 		Millis_Cycle = 0;
 	}
 
+	
+
 }
+
+// ################################
+
 
 
 // EEProm:  Save and Restore Cycle
@@ -768,6 +822,7 @@ void millisecond_timer()
 	Millis_HeaterThisBang++;
 	Millis_CryoTimeout++;		
 	Millis_HeatingRate++;
+	Millis_HWTest++;
 
 	// set hh:mm:ss
 	if (Timer_is_on)

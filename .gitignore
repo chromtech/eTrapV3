@@ -38,3 +38,9 @@ CSharp/DataLogging/bin/Debug/app.publish/CControler.exe
 *.cache
 
 CSharp/DataLogging/obj/x86/Debug/5-DataLogging.csproj.FileListAbsolute.txt
+
+Arduino/eTrap/.vs/eTrap/v15/.suo
+
+Arduino/eTrap/__vm/
+
+Arduino/eTrap/Release/
