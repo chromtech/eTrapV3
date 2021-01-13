@@ -1,0 +1,51 @@
+﻿
+
+1.
+Set  Standby Temperature
+
+2.
+Wait Sync Signal "GC_Prepare"		( Wait for Prepare from GC = IN from GC:PREPRUN)
+								( GC_Prepare=D12 IN)		PAL ref: wait for SW OUT 2 = PREPARE)
+
+3.
+Switch off  GC's GC_Ready to prevent from getting ready
+Set GC_Ready = 0;
+	 = OUT to GC:GC_Ready Pin	( GC_Ready = D11 OUT		PAL ref: TTL In 1 = GC_Ready )
+
+4.
+Switch eTrap to COOLING			( TRAP_Cool = D10 OUT		PAL ref: TTL Out 3 high > switch the eTrap to Cool Mode )
+
+5.
+Set Low Temperature  ( -40 to +10 C )
+
+6.
+Start/Wait Timer  " Pre Inject Low Time "
+
+7.
+Set GC_Ready = 1 
+	= OUT to GC:GC_Ready Pin
+
+8.
+Wait for Inject Signal
+Get GC_Start 
+	= In from GC:Start			( GC_Start = D09 IN			PAL ref: SW_OUT 1 )
+
+9.
+Start/Wait Timer  " Post Injection Low Time "
+
+10.
+Switch eTrap to HEATING	
+Set TRAP_Cool = 0;		( PAL ref: TTL Out 3 low > switch the eTrap to Heater Mode )
+
+11.
+Start Timer  " High Temperature "
+
+12.
+Set eTrap High Temperature
+
+13.
+Wait for Timer  " High Temperature "
+
+14. 
+Restart this Cycle
+

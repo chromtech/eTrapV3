@@ -1,0 +1,10 @@
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\bin\Debug\6-ArduinoController.exe
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\bin\Debug\6-ArduinoController.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\bin\Debug\CommandMessenger.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\bin\Debug\CommandMessenger.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\obj\x86\Debug\ArduinoController.ControllerForm.resources
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\obj\x86\Debug\_6_ArduinoController.Properties.Resources.resources
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\obj\x86\Debug\6-ArduinoController.csproj.GenerateResource.Cache
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\obj\x86\Debug\6-ArduinoController.exe
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\obj\x86\Debug\6-ArduinoController.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\ArduinoController\obj\x86\Debug\6-ArduinoController.csprojResolveAssemblyReference.cache

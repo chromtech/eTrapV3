@@ -1,0 +1,7 @@
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\bin\Debug\SendAndReceive.exe
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\bin\Debug\SendAndReceive.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\bin\Debug\CommandMessenger.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\bin\Debug\CommandMessenger.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\obj\x86\Debug\SendAndReceive.exe
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\obj\x86\Debug\SendAndReceive.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\SendAndReceive\obj\x86\Debug\2-SendAndReceive.csprojResolveAssemblyReference.cache

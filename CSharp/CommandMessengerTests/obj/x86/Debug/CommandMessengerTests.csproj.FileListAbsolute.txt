@@ -1,0 +1,11 @@
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\bin\Debug\CommandMessengerTests.exe
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\bin\Debug\CommandMessengerTests.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\bin\Debug\CommandMessenger.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\bin\Debug\CommandMessenger.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.exe
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.csprojResolveAssemblyReference.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.csprojResolveAssemblyReference.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.exe
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessengerTests\obj\x86\Debug\CommandMessengerTests.pdb

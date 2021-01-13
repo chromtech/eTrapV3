@@ -1,0 +1,25 @@
+ *************************************
+ *** Start test-set Opening connections ****
+ *************************************
+
+   *** Start test Test opening connection ****
+
+      Not OK: Exception during opening connection
+   *** End test Test opening connection ****
+
+   Test failed
+
+   *** Start test Test sending command ****
+
+      Not OK: Exception during sending of command
+   *** End test Test sending command ****
+
+   Test failed
+
+   *** Start test Test closing connection ****
+
+      Not OK: Exception during opening connection
+   *** End test Test closing connection ****
+
+   Test failed
+

@@ -1,0 +1,51 @@
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\CommandMessenger.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\CommandMessenger.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.pdb
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\mscorlib.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\de\mscorlib.resources.dll
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\normidna.nlp
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\normnfc.nlp
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\normnfd.nlp
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\normnfkc.nlp
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\normnfkd.nlp
+C:\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.csprojResolveAssemblyReference.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp\CommandMessenger\obj\Debug\CommandMessenger.csprojResolveAssemblyReference.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.5.1 current\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.5.1 current\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.5.1 current\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.5.1 current\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.5.1 current\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.6.1 current\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.6.1 current\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.6.1 current\CommandMessenger\obj\Debug\CommandMessenger.csprojResolveAssemblyReference.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.6.1 current\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.6.1 current\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.6.1 current\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.7  current\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.7  current\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.7  current\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.7  current\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.7  current\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.1  current\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.1  current\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.1  current\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.1  current\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.1  current\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.1  current\CommandMessenger\obj\Debug\CommandMessenger.csprojResolveAssemblyReference.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.2  current\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.2  current\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.2  current\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.2  current\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\Projects\Arduino projects\CmdMessenger\CmdMessenger\CSharp - V 2.8.2  current\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\GIT Projects\eTrap V3\CSharp\CommandMessenger\bin\Debug\CommandMessenger.dll
+D:\GIT Projects\eTrap V3\CSharp\CommandMessenger\bin\Debug\CommandMessenger.pdb
+D:\GIT Projects\eTrap V3\CSharp\CommandMessenger\obj\Debug\CommandMessenger.csproj.CoreCompileInputs.cache
+D:\GIT Projects\eTrap V3\CSharp\CommandMessenger\obj\Debug\CommandMessenger.dll
+D:\GIT Projects\eTrap V3\CSharp\CommandMessenger\obj\Debug\CommandMessenger.pdb
+D:\GIT Projects\eTrap V3\CSharp\CommandMessenger\obj\Debug\CommandMessenger.csprojResolveAssemblyReference.cache

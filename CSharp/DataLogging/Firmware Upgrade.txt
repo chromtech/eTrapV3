@@ -1,0 +1,103 @@
+﻿
+16.5.2018 TB
+New Nanos need a faster communication for Firmware Update:
+old: 57600   new: 115200
+This is ONLY valid for FW Update, not for usage.
+
+
+I tried to ask this question before but I don't think I explained myself well so I will try again. 
+I want to send a hex file to my Uno, either via the Arduino IDE or other serial program. 
+The way the Arduino IDE works as much as I can determine, is it compiles the c code then sends it, 
+the HEX file,  to the Uno without any special AVRISP hardware via a USB port. 
+Can I intervene between the complier and the uploader in the Ardunio IDE, 
+and insert my hex file without having to run the complier, and without the use of AVRISP hardware. 
+It seems the Avrdude requires AVRISP hardware so that will not help me. 
+Also, the AVRdude manual doesn't show the ATMega328P chip on its list of parts it supports.
+
+How does the Ardunio IDE load the hexcode without AVRISP hardware. Maybe I can emulate it?
+Seems simple enough but I am unable to do this.
+
+###
+
+Next time you have your IDE open, go into File:Preferences and turn on the Verbose outputs.
+Upload a sketch, any simple thing like Blink.
+When its done, look at the listing that is created.
+You will see at the end of the compilation, and the start of the upload, something that looks like this:
+Binary sketch size: 6,292 bytes (of a 258,048 byte maximum)
+C:\Arduino-1.0.1\hardware/tools/avr/bin/avrdude -CC:\Arduino-1.0.1\hardware/tools/avr/etc/avrdude.conf -v -v -v -v -patmega2560 -cstk500v2 -Pusb -Uflash:w:C:\Users\Owner\AppData\Local\Temp\build6183648410028762648.tmp\RX_seriai_io_test.cpp.hex:i 
+
+On mine, these were the last thing in White. You will need to run that with your hexfile.
+This particular command is from File:Upload Using Programmmer (with Atmel AVR ISP MKii and a ATMega2560). 
+ I suspect the command will  be different
+for File:Upload and a different programmer and a different chip.
+
+## 
+If
+C:\Arduino-1.0.1\hardware/tools/avr/bin/avrdude -CC:\Arduino-1.0.1\hardware/tools/avr/etc/avrdude.conf -v -v -v -v -patmega2560 -cstk500v2 -Pusb -Uflash:w:C:\Users\Owner\AppData\Local\Temp\build6183648410028762648.tmp\RX_seriai_io_test.cpp.hex:i
+
+Is the command run by the IDE than presumably you can cut and paste that into a DOS window.
+Trouble is the path changes I think because the IDE creates temporary folders (the highlighted part), 
+probably at every invocation although I've never checked.
+
+##
+
+The partnumber is specified as: atmega328p
+So the command line should be like this
+avrdude -patmega328p -carduino -PCOM20 -b115200 -D -Uflash:w:D:\hexfiles\Blink.hex:i
+
+A short explanation:
+
+-patmega328p partnumber atmega328p
+-carduino programmer is arduino
+-PCOM20 the serial port your arduino is connected to
+-b115200 baud rate - upload speed
+-D diasables erasing
+-Uflash:w  Write to Flash memory
+D:\hexfiles\Blink.hex  path and file name to the hex file
+:i   optional, indicates an Intel hexfile
+
+##
+
+Thanks for the explanation Erni.
+Could that be put in a .bat file or something and sent to someone with avrdude.exe 
+and a programmer to load up a bunch of parts?
+
+##
+
+Yes, no problem, just put the line in a texteditor and save it with a .bat extension.
+Atleast that works on a windows machine, I have no experience with other OS's
+
+##
+
+Thanks for the information. I got it to work with AVRDUDE, Hurray. 
+I had to move the AVRDUDE config file to the same directory as the AVRDUDE.exe file first though. 
+This will make it simple to  update software at the end user.
+I do have one other question, Is there some way to change the destination file 
+of the compiled code hex file. Mine goes to a temp file in my docs and settings, etc, etc. 
+It is a very long command line and I would like to redirect it to a different file. 
+I have look here and there and I can't find a place to change the path.
+
+##
+
+Changing the destination for the HEX-file is a topic that is often discussed, for example:
+http://arduino.cc/forum/index.php/topic,77249.0.html
+
+##
+
+If the avrdude command is used, the directory Source where the file to be uploaded is located 
+can be changed tho, yes?
+
+avrdude -patmega328p -carduino -PCOM20 -b115200 -D -Uflash:w:D:\hexfiles\Blink.hex:i
+
+##
+
+Yes, as far as  I can determine.
+I moved the hex file to a different folder and I loaded it from there, i.e. C:\AVRHEXfiles\ <files
+
+##
+
+As far as i know, there is no way to change the default path the Arduino IDE use:
+http://arduino.cc/forum/index.php/topic,114503.0.html
+Maybe there is a solution in the thread above, I haven't tried it (Debug Arduino with Proteus).
+I did the same as StanK, copied the hex file to D:\hexfiles to avoid the long path.
+
