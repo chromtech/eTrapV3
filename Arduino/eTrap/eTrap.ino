@@ -19,7 +19,10 @@ const int CycleVersion = 5;
 //	2 = standard 2.8    Ralf Controler	+	CT eTrap V1
 //  3 = V3				CT controler	+	CT eTrap V1
 int HWVersion = 2;				// Default. Check real version at Startup
-int HWVersion_TestStep = 0;		// Used in Do_CheckHardwareVersions
+int HWTest_Step = 0;		// Used in Do_CheckHardwareVersions
+int HWTest_TempLow = 0;
+int HWTest_TempHigh = 0;
+bool HWTest_Verbose = true;
 
 // Varian GC
 const bool IS_BRUKER = false;  // FW 2.x. True for eTrap_FW_2.x_BrukerVarianGC.hex  flase for eTrap_FW_2.x.hex
@@ -31,6 +34,7 @@ bool FAKE_TEMPERATURE_AND_HEATERS			= false;			// NOT Sent from PC
 // Set time that simulates waiting for a Sync Signal
 unsigned long FAKE_SYNC_SINGALS_WAIT_SECONDS = 10 ;	// 10 seconds waiting for each Sync Signals;			
 
+// ON / OFF
 const int ON	= HIGH;
 const int OFF	= LOW;
 
@@ -74,7 +78,7 @@ float currentHeatRate			= 0;	// calced from lastHeatRateTemp / currentHeatRateTe
 float rateToSwitchOnIntegral	= 0;	// If rate is lower :  Swicth on the Integral
 
 // Update intervals inside loop  100 = 0.1 second interval, 10 Hz frequency
-const unsigned long interval_HWTest = 1000;
+	  unsigned long interval_HWTest = 500;
 const unsigned long interval_Temperature = 50;	// was 100  0.8 sec read Temperature and Security Issues
 const unsigned long interval_Htr = 50;			// was 100  0.8 sec update PID and set 
 const unsigned long interval_Average = 5;		// 5 msec read Analog In 1 for average
@@ -106,7 +110,6 @@ long startLoggingMillis            = 0;
 float AnalogIn7_Power				= 0;
 const int AnalogPin7_Power			= 7;
 
-
 // Temperature and Update
 const int AnalogPin0_Temperature               = 0;
 unsigned long Millis_Temperature	= 0;
@@ -121,8 +124,8 @@ float TempCorrectionSlope_LowTemp	= 1;	// curr. unused
 float TempCorrectionSlope_MidTemp	= 1;	// Set from GUI 'Slope'
 float TempCorrectionSlope_HiTemp	= 1;	// curr. unused
 
-// PWM Update
-const int PWMPin					= 3;	// D3 OUT = Pin 4 ?
+// PWM and other Update intervals
+int PWMPin							= 3;	// D3 OUT Heater/Cooler  HW V2
 int HeaterIsOn						= 0;
 unsigned long Millis_Htr = 0;
 
@@ -157,8 +160,6 @@ int Timer_seconds				= 0;
 int Timer_minutes				= 0;
 int Timer_hours				= 0;
 
-
-
 // TTL IN and OUT
 const int pin_GC_Prepare			= 12;	// D12 IN = 
 const int dir_GC_Prepare			= INPUT;
@@ -178,28 +179,31 @@ const int pin_TRAP_Cool				=  9;	// D9 OUT
 const int dir_TRAP_Cool				= OUTPUT;
 	  int state_TRAP_Cool			= OFF;
 
-	  // Version 2.x: Prepare 2 added
+// FW Version 2.x: Prepare 2 added
 const int pin_Prepare_2				= 8;	// D8 IN = Pin 11   >  PAL TTL OUT 3 (pin 6)
 const int dir_Prepare_2				= INPUT;
 	  int state_Prepare_2			= OFF;
 
-// other Pins 
-const int pin_Unused_IN_2			= 7;	// D7 IN = Pin 5   >  PAL TTL OUT 2 (pin 5)
-const int dir_Unused_IN_2			= INPUT;
-	  int state_Unused_IN_2			= OFF;
-const int pin_MuxTemp				= 6;	// D6 OUT = Pin 9   >  MUX Temp
-	  int dir_MuxTemp				= OUTPUT;
+// HWVersion 3
+const int pin_MoveToFront			= 7;	// D7 OUT = HW 3  Move (and hold) Motor to front position
+const int dir_MoveToFront			= OUTPUT;
+	  int state_MoveToFront			= OFF;	  
+
+const int pin_MuxTemp				= 4;	// D4 OUT = HW 3  MUX Temp
+const int dir_MuxTemp				= OUTPUT;
 	  int state_MuxTemp				= OFF;
 
-const int pin_Unused_OUT_3			= 5;	// D5 OUT = Pin 8   >  PAL TTL IN 3 (pin 3)
-const int dir_Unused_OUT_3			= OUTPUT;
-	  int state_Unused_OUT_3		= OFF;
-const int pin_Unused_OUT_2			= 4;	// D4 OUT = Pin 7   >  PAL TTL IN 3 (pin 2)
-const int dir_Unused_OUT_2			= OUTPUT;
-	  int state_Unused_OUT_2		= OFF;
-const int pin_Unused_OUT_1			= 2;	// D2 OUT = Pin 5   >  PAL TTL IN 3 (pin 1)
-const int dir_Unused_OUT_1			= OUTPUT;
-	  int state_Unused_OUT_1		= OFF;
+const int pin_FuseTemp				= 2;	// D2 IN = HW 3  Bi-Metall Temperatursicherung  
+const int dir_FuseTemp				= INPUT;
+	  int state_FuseTemp			= OFF;
+
+const int pin_HeaterV3				= 6;	// D6 OUT = HW 2  Heater Pin
+const int dir_HeaterV3				= OUTPUT;
+	  int state_HeaterV3			= OFF;
+
+const int pin_CoolerV3				= 5;	// D5 OUT = HW 2  Cooler Pin
+const int dir_CoolerV3				= OUTPUT;
+	  int state_CoolerV3			= OFF;
 
 //_________________________________________
 //  C Y C L E S
@@ -383,30 +387,102 @@ void OnArduinoReady()
 
 void Do_CheckHardwareVersions()
 {
-	HWVersion_TestStep++;
+	HWTest_Step++;
 
-	cmdMessenger.sendCmd(0, currentTemperature);
-	cmdMessenger.sendCmd(0, " --- ");
-
-
-	switch (HWVersion_TestStep)
+	switch (HWTest_Step)
 	{
-	case 1:
-		// 1. Check, if Temp can be MUX'ed
-		dir_MuxTemp = OUTPUT;
-		pinMode(pin_MuxTemp, dir_MuxTemp);
-		set_Pin_MuxTemp(LOW);
-		cmdMessenger.sendCmd(0, "HWTest 1 Mux LOW");
-		break;
 	case 2:
-		set_Pin_MuxTemp(HIGH);
-		cmdMessenger.sendCmd(0, "HWTest 2 Mux HIGH");
+		// Test B:
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Fuse State:");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, state_FuseTemp);
+		if (state_FuseTemp == 0)
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW Version 2 detected");
+		}
+		else
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW Version 3 detected");
+		}
+
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "  ");
+
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Starting Test B...");
+		switch_Pin_MuxTemp(LOW);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
 		break;
-	
+	case 3:
+		HWTest_TempLow = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempLow);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
+		switch_Pin_MuxTemp(HIGH);
+		break;
+	case 4:
+		HWTest_TempHigh = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempHigh);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+
+		
+
+		if (abs(HWTest_TempHigh - HWTest_TempLow) < 10)
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version unclear. Running Test C...");
+		}
+		else
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version 3 detected. Stop testing.");
+			HWVersion = 3;
+			PWMPin = pin_HeaterV3;
+			switch_Pin_MuxTemp(LOW);
+			interval_HWTest = 10000;
+			HWTest_Step = 100;
+		}
+		break;
+	case 5:
+		// switch on heater
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Set Heater to Pin 6");
+		analogWrite(pin_HeaterV3, 255);
+		break;
+	case 8:
+		// switch off heater
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Set Heater to Pin 3");
+		analogWrite(pin_HeaterV3, OFF);
+		break;
+	case 9:
+		switch_Pin_MuxTemp(LOW);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
+		break;
+	case 10:
+		HWTest_TempLow = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempLow);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
+		switch_Pin_MuxTemp(HIGH);
+		break;
+	case 11:
+		HWTest_TempHigh = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempHigh);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+		if (abs(HWTest_TempHigh - HWTest_TempLow) < 5)
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 2 detected");
+			HWVersion = 2;
+		}
+		else
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
+			HWVersion = 3;	
+			PWMPin = pin_HeaterV3;
+			switch_Pin_MuxTemp(LOW);
+		}
+		
+		interval_HWTest = 100000;
+		HWTest_Step = 100;
 
 		default:
-			HWVersion_TestStep = 100;
-		break;
+			if (HWTest_Step > 1000)		HWTest_Step = 100;		// prevent overflow
+			break;
 	}
 	
 	
@@ -415,11 +491,22 @@ void Do_CheckHardwareVersions()
 	
 }
 
-void set_Pin_MuxTemp(int state)
-{
-	//pinMode(pin_MuxTemp, dir_MuxTemp);
-	digitalWrite(pin_MuxTemp, state);
-	state_MuxTemp = state;
+void switch_Pin_MuxTemp(int state)
+{	state_MuxTemp = state;
+	digitalWrite(pin_MuxTemp, state_MuxTemp);
+
+	/*if (state_MuxTemp == HIGH)
+	{
+		cmdMessenger.sendCmd(0, " Mux HIGH ");
+	}
+	else
+	{
+		cmdMessenger.sendCmd(0, " Mux LOW ");
+	}*/
+
+	// reset for next average round
+	Average_count = 0;
+	AnalogIn0_Temperature = 0;
 }
 
 // ################################
@@ -451,7 +538,7 @@ void setup()
 	// Set Pins for 
 	pinMode(_blinkLed_Pin, OUTPUT);					// blink LED
 	pinMode(pin_GC_Prepare, dir_GC_Prepare);	// pin_GC_Prepare
-	//pinMode(pin_GC_Ready, dir_GC_Ready);		// pin_GC_Ready  can be Input or output
+
 	if (IS_BRUKER)
 	{
 		pinMode(pin_GC_Ready, dir_GC_Ready_OUT);		// pin_GC_Ready  can be Input or output
@@ -466,6 +553,27 @@ void setup()
 	pinMode(pin_TRAP_Cool, dir_TRAP_Cool);		// Trap Cooling 
 		set_pin_TRAP_Cool_and_Consequences(OFF);
 	pinMode(pin_GC_Start, dir_GC_Start);		// pin_GC_Start
+
+
+	// HW3 Addons
+	// MUX Temperature reading
+	pinMode(pin_MuxTemp, dir_MuxTemp);
+	// Heater PWM
+	state_HeaterV3 = OFF;
+	pinMode(pin_HeaterV3, dir_HeaterV3);
+	analogWrite(pin_HeaterV3, state_HeaterV3);
+	// Cooler PWM
+	state_CoolerV3 = OFF;
+	pinMode(pin_CoolerV3, dir_CoolerV3);
+	analogWrite(pin_CoolerV3, state_CoolerV3);
+	// Motors Move Cooler To Front
+	state_MoveToFront = OFF;
+	pinMode(pin_MoveToFront, dir_MoveToFront);
+	digitalWrite(pin_MoveToFront, state_MoveToFront);
+	// Bi-Metall Temperatursicherung
+	pinMode(pin_FuseTemp, dir_FuseTemp);
+	state_FuseTemp = digitalRead(pin_FuseTemp);
+	
 
 	// Adds newline to every command
 	cmdMessenger.printLfCr();   
@@ -1722,7 +1830,15 @@ void Update_TTLs()
 	get_pin_TRAP_Cool();
 	get_pin_GC_Start();
 	get_pin_Prepare_2();
+	get_pin_FuseTemp();
 }
+
+float get_pin_FuseTemp()
+{
+	state_FuseTemp = digitalRead(pin_FuseTemp);
+	return (float)state_FuseTemp;
+}
+
 float get_pin_GC_Prepare()
 {	
 	if (FAKE_SYNC_SIGNALS)													// check FAKE_TEMPERATURE_AND_HEATERS
