@@ -18,10 +18,16 @@ const int CycleVersion = 5;
 // HW version:  
 //	2 = standard 2.8    Ralf Controler	+	CT eTrap V1
 //  3 = V3				CT controler	+	CT eTrap V1
-int HWVersion = 2;				// Default. Check real version at Startup
+int HWVersion = 0;				// 0 = Unchecked, Check real version at Startup
 int HWTest_Step = 0;		// Used in Do_CheckHardwareVersions
-int HWTest_TempLow = 0;
-int HWTest_TempHigh = 0;
+int HWTest_Result_A = 0;
+int HWTest_Result_B = 0;
+int HWTest_Result_C = 0;
+int HWTest_B_TempLow_Start = 0;
+int HWTest_B_TempLow_End = 0;
+int HWTest_C_TempLow_Start = 0;
+int HWTest_C_TempLow_End = 0;
+int HWTest_C_TempHigh = 0;
 bool HWTest_Verbose = true;
 
 // Varian GC
@@ -125,7 +131,9 @@ float TempCorrectionSlope_MidTemp	= 1;	// Set from GUI 'Slope'
 float TempCorrectionSlope_HiTemp	= 1;	// curr. unused
 
 // PWM and other Update intervals
-int PWMPin							= 3;	// D3 OUT Heater/Cooler  HW V2
+const int pin_PWM_HW2 = 3;			// D3 OUT Heater/Cooler  HW V2
+int PWMPin							= 13;	// Use LED until we know the version
+
 int HeaterIsOn						= 0;
 unsigned long Millis_Htr = 0;
 
@@ -150,7 +158,7 @@ unsigned long Millis_HeatingRate = 0;
 
 // Blinking led variables 
 bool _state_Led						= OFF;   // Current state of Led
-const int _blinkLed_Pin					= 13;  // Pin of internal Led
+const int pin_LedBuiltIn					= 13;  // Pin of internal Led
 
 // Timer vars
 bool Timer_is_on					= false;
@@ -393,92 +401,152 @@ void Do_CheckHardwareVersions()
 	{
 	case 2:
 		// Test B:
+		state_FuseTemp = digitalRead(pin_FuseTemp);
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Fuse State:");
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, state_FuseTemp);
-		if (state_FuseTemp == 0)
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, state_FuseTemp);		
+		if (state_FuseTemp == LOW)
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW Version 2 detected");
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 2 detected  (OR HW 3 w/ open Fuse)");
+			HWTest_Result_A = 2;
 		}
 		else
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW Version 3 detected");
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 3 detected");
+			HWTest_Result_A = 3;
 		}
 
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "  ");
 
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Starting Test B...");
+
 		switch_Pin_MuxTemp(LOW);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Starting Test B...");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
 		break;
 	case 3:
-		HWTest_TempLow = currentTemperature;
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempLow);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
-		switch_Pin_MuxTemp(HIGH);
+		HWTest_B_TempLow_Start = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_B_TempLow_Start);
 		break;
-	case 4:
-		HWTest_TempHigh = currentTemperature;
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempHigh);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
-
-		
-
-		if (abs(HWTest_TempHigh - HWTest_TempLow) < 10)
-		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version unclear. Running Test C...");
-		}
-		else
-		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version 3 detected. Stop testing.");
-			HWVersion = 3;
-			PWMPin = pin_HeaterV3;
-			switch_Pin_MuxTemp(LOW);
-			interval_HWTest = 10000;
-			HWTest_Step = 100;
-		}
-		break;
-	case 5:
+	case 6:
 		// switch on heater
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Set Heater to Pin 6");
-		analogWrite(pin_HeaterV3, 255);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 ON 2 seconds");
+		analogWrite(pin_PWM_HW2, 255);
 		break;
 	case 8:
 		// switch off heater
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Set Heater to Pin 3");
-		analogWrite(pin_HeaterV3, OFF);
-		break;
-	case 9:
-		switch_Pin_MuxTemp(LOW);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
-		break;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 OFF");
+		analogWrite(pin_PWM_HW2, OFF);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
+		break;	
 	case 10:
-		HWTest_TempLow = currentTemperature;
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempLow);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
-		switch_Pin_MuxTemp(HIGH);
-		break;
-	case 11:
-		HWTest_TempHigh = currentTemperature;
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_TempHigh);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
-		if (abs(HWTest_TempHigh - HWTest_TempLow) < 5)
+		HWTest_B_TempLow_End = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_B_TempLow_End);
+		if (HWTest_B_TempLow_End >= HWTest_B_TempLow_Start + 5)
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 2 detected");
-			HWVersion = 2;
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version 2 detected");
+			HWTest_Result_B = 2;
 		}
 		else
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
-			HWVersion = 3;	
-			PWMPin = pin_HeaterV3;
-			switch_Pin_MuxTemp(LOW);
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: No Heater OR HW 3");
+			HWTest_Result_B = 0;
 		}
+		break;
+
+	case 11:
+		HWTest_C_TempLow_Start = currentTemperature;	// get current Temp before heating
+		// switch on heater
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW3 ON 2 seconds");
+		analogWrite(pin_HeaterV3, 255);
+		break;
+	case 15:
+		// switch off heater
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW3 OFF");
+		analogWrite(pin_HeaterV3, OFF);
+
 		
-		interval_HWTest = 100000;
-		HWTest_Step = 100;
+		break;
+	case 17:
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
+		HWTest_C_TempLow_End = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_C_TempLow_End);
+
+		// switch to Temp Sensor
+		switch_Pin_MuxTemp(HIGH);
+		break;
+	case 18:
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
+		HWTest_C_TempHigh = currentTemperature;
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_C_TempHigh);
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+
+		if (HWTest_C_TempLow_End >= HWTest_C_TempLow_Start + 5)
+		{
+			if (HWTest_C_TempLow_End >= HWTest_C_TempHigh + 5)		// Low = bottom detector, High = Top detector (Cooler)
+			{
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
+
+				if (HWTest_Result_A == 2)
+				{
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "        HW Version 3 with OPEN Fuse detected");
+				}
+				HWTest_Result_C = 3;
+			}
+		}		
+		else
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: No Heater OR HW 2");
+			HWTest_Result_C = 0;
+		}
+		break;
+
+	//case 16:
+	//	//  Check Results:
+	//	if ( (HWTest_Result_B == 2) )		// Fuse open (missing), heat up same temperatures
+	//	{
+	//		
+	//		if ((HWTest_B_TempLow + 5) <= HWTest_C_TempLow)			// Heater working
+	//		{
+	//			HWVersion = 2;
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A, B, Heater: HW Version 2 detected");
+	//		}
+	//		else
+	//		{
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A and B, no Heater: HW Version 2 detected, Heater not ok");
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater Cable disconnected?");
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temperature Fuse open?");
+	//			HWVersion = 2;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if ( (HWTest_Result_C == 3))	// Fuse Closed (1), initial diff. Temps, heat up diff Temps
+	//		{
+	//			HWVersion = 3;
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
+	//			if (HWTest_Result_A == 2) {
+	//				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: Fuse OPEN");
+	//			}
+	//		}
+	//		else
+	//		{ 
+	//			HWVersion = 0;		// HW3: Fuse OPEN (Error), MUX not working, HW 3 Heater defective
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A, B, C: No consistant HW detected (HW Version 0)");
+	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater Cable disconnected?");
+	//		}
+
+	//	}
+
+	//	if (HWVersion == 3)		{
+	//		PWMPin = pin_HeaterV3;
+	//		switch_Pin_MuxTemp(LOW);
+	//	}
+	//	if (HWVersion == 2) {
+	//		PWMPin = pin_PWM_HW2;
+	//	}
+
+
+	//	interval_HWTest = 100000;
+	//	HWTest_Step = 100;
 
 		default:
 			if (HWTest_Step > 1000)		HWTest_Step = 100;		// prevent overflow
@@ -536,7 +604,7 @@ void setup()
 	Serial.begin(115200); 
 
 	// Set Pins for 
-	pinMode(_blinkLed_Pin, OUTPUT);					// blink LED
+	pinMode(pin_LedBuiltIn, OUTPUT);			// blink LED
 	pinMode(pin_GC_Prepare, dir_GC_Prepare);	// pin_GC_Prepare
 
 	if (IS_BRUKER)
@@ -572,8 +640,10 @@ void setup()
 	digitalWrite(pin_MoveToFront, state_MoveToFront);
 	// Bi-Metall Temperatursicherung
 	pinMode(pin_FuseTemp, dir_FuseTemp);
+	//digitalWrite(pin_FuseTemp, HIGH);
 	state_FuseTemp = digitalRead(pin_FuseTemp);
 	
+	PWMPin = pin_LedBuiltIn;	// Use LED-pin as Heater-pin until we know the HW Version
 
 	// Adds newline to every command
 	cmdMessenger.printLfCr();   
@@ -1803,21 +1873,21 @@ void average_AnalogPin0_Temperature()
 // LED  Stuff
 	// toggle Led
 void ledSwitch()
-{	digitalWrite(_blinkLed_Pin, _state_Led?HIGH:LOW);
+{	digitalWrite(pin_LedBuiltIn, _state_Led?HIGH:LOW);
 	_state_Led = !_state_Led;
 }
 void ledOFF()
-{	digitalWrite(_blinkLed_Pin, LOW);
+{	digitalWrite(pin_LedBuiltIn, LOW);
 	_state_Led = LOW;
 }
 void ledON()
-{	digitalWrite(_blinkLed_Pin, HIGH);
+{	digitalWrite(pin_LedBuiltIn, HIGH);
 	_state_Led = HIGH;
 }
 	// switch on/off counts time
 void ledFlicker(int counts)
 {	for (int i = 0; i<counts; i++){
-		digitalWrite(_blinkLed_Pin, _state_Led?HIGH:LOW);
+		digitalWrite(pin_LedBuiltIn, _state_Led?HIGH:LOW);
 		_state_Led = !_state_Led;
 		delay (50);
 		}
