@@ -131,7 +131,7 @@ float TempCorrectionSlope_MidTemp	= 1;	// Set from GUI 'Slope'
 float TempCorrectionSlope_HiTemp	= 1;	// curr. unused
 
 // PWM and other Update intervals
-const int pin_PWM_HW2 = 3;			// D3 OUT Heater/Cooler  HW V2
+const int pin_Heater_HW2 = 3;			// D3 OUT Heater/Cooler  HW V2
 int PWMPin							= 13;	// Use LED until we know the version
 
 int HeaterIsOn						= 0;
@@ -183,9 +183,9 @@ const int pin_GC_Start				= 10;	// D10 IN
 const int dir_GC_Start				= INPUT;
 	  int state_GC_Start			= OFF;
 
-const int pin_TRAP_Cool				=  9;	// D9 OUT
-const int dir_TRAP_Cool				= OUTPUT;
-	  int state_TRAP_Cool			= OFF;
+const int pin_MoveToFront_HW2			=  9;	// D9 OUT  HW 2
+const int dir_MoveToFront_HW2				= OUTPUT;
+	  int state_CoolingPosition		= OFF;
 
 // FW Version 2.x: Prepare 2 added
 const int pin_Prepare_2				= 8;	// D8 IN = Pin 11   >  PAL TTL OUT 3 (pin 6)
@@ -193,9 +193,12 @@ const int dir_Prepare_2				= INPUT;
 	  int state_Prepare_2			= OFF;
 
 // HWVersion 3
-const int pin_MoveToFront			= 7;	// D7 OUT = HW 3  Move (and hold) Motor to front position
-const int dir_MoveToFront			= OUTPUT;
-	  int state_MoveToFront			= OFF;	  
+	  int pin_MoveToFront = pin_MoveToFront_HW2;
+
+const int pin_MoveToFront_HW3			= 7;	// D7 OUT = HW 3  Move (and hold) Motor to front position
+const int dir_MoveToFront_HW3			= OUTPUT;
+	  //old: state_MoveToFront			= OFF;	  USE state_Trap_Cool  instead
+
 
 const int pin_MuxTemp				= 4;	// D4 OUT = HW 3  MUX Temp
 const int dir_MuxTemp				= OUTPUT;
@@ -205,13 +208,13 @@ const int pin_FuseTemp				= 2;	// D2 IN = HW 3  Bi-Metall Temperatursicherung
 const int dir_FuseTemp				= INPUT;
 	  int state_FuseTemp			= OFF;
 
-const int pin_HeaterV3				= 6;	// D6 OUT = HW 2  Heater Pin
-const int dir_HeaterV3				= OUTPUT;
-	  int state_HeaterV3			= OFF;
+const int pin_Heater_HW3				= 6;	// D6 OUT = HW 3  Heater Pin
+const int dir_Heater_HW3				= OUTPUT;
+	  int state_Heater_HW3			= OFF;
 
-const int pin_CoolerV3				= 5;	// D5 OUT = HW 2  Cooler Pin
-const int dir_CoolerV3				= OUTPUT;
-	  int state_CoolerV3			= OFF;
+const int pin_Cooler_HW3				= 5;	// D5 OUT = HW 3  Cooler Pin
+const int dir_Cooler_HW3				= OUTPUT;
+	  int state_Cooler_HW3			= OFF;
 
 //_________________________________________
 //  C Y C L E S
@@ -400,62 +403,59 @@ void Do_CheckHardwareVersions()
 	switch (HWTest_Step)
 	{
 	case 1:
-		if (currentTemperature >= 300)
+		if (currentTemperature >= 400)
 		{
-			cmdMessenger.sendCmd(0, "Temperature ERROR");
-			HWTest_Step = 18;		// Skip more testing
+			HWTest_Step = 19;		// Skip more testing
 		}
 		break;
-	case 2:	
+	case 3:
+
 		// Test B:
 		state_FuseTemp = digitalRead(pin_FuseTemp);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Fuse State:");
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Fuse:");
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, state_FuseTemp);
 		if (state_FuseTemp == LOW)
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 2 detected  (OR HW 3 w/ open Fuse)");
+			//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 2 detected  (OR HW 3 w/ open Fuse)");
 			HWTest_Result_A = 2;
 		}
 		else
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 3 detected");
+			//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 3 detected");
 			HWTest_Result_A = 3;
 		}
 
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "  ");
-
-
-		switch_Pin_MuxTemp(LOW);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Starting Test B...");
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
+		switch_HW3_MUX_Temp(LOW);
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Starting Test B...");
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
 
 		break;
-	case 3:
+	case 4:
 		HWTest_B_TempLow_Start = currentTemperature;
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_B_TempLow_Start);
 		break;
-	case 6:
+	case 5:
 			// switch on heater
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 ON for 2 seconds...");
-			analogWrite(pin_PWM_HW2, 255);
+			//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 ON for 2 seconds...");
+			analogWrite(pin_Heater_HW2, 255);
 		break;
 	case 8:
 		// switch off heater
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 OFF");
-		analogWrite(pin_PWM_HW2, OFF);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 OFF");
+		analogWrite(pin_Heater_HW2, OFF);
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
 		break;	
 	case 10:
 		HWTest_B_TempLow_End = currentTemperature;
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_B_TempLow_End);
 		if (HWTest_B_TempLow_End >= HWTest_B_TempLow_Start + 5)
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version 2 detected");
+			//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: HW Version 2 detected");
 			HWTest_Result_B = 2;
 		}
 		else
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: No Heater OR HW 3");
+			//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test B: No Heater OR HW 3");
 			HWTest_Result_B = 0;
 		}
 		break;
@@ -463,135 +463,130 @@ void Do_CheckHardwareVersions()
 	case 11:
 		HWTest_C_TempLow_Start = currentTemperature;	// get current Temp before heating
 		// switch on heater
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW3 ON 2 seconds");
-		analogWrite(pin_HeaterV3, 255);
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW3 ON 2 seconds");
+		analogWrite(pin_Heater_HW3, 255);
 		break;
 	case 15:
 		// switch off heater
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW3 OFF");
-		analogWrite(pin_HeaterV3, OFF);
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW3 OFF");
+		analogWrite(pin_Heater_HW3, OFF);
 
 		
 		break;
 	case 17:
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp LOW =>");
 		HWTest_C_TempLow_End = currentTemperature;
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_C_TempLow_End);
 
 		// switch to Temp Sensor
-		switch_Pin_MuxTemp(HIGH);
+		switch_HW3_MUX_Temp(HIGH);
 		break;
 	case 18:
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp High =>");
 		HWTest_C_TempHigh = currentTemperature;
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_C_TempHigh);
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
+		//if (HWTest_Verbose) cmdMessenger.sendCmd(0, " --- ");
 
 		if (HWTest_C_TempLow_End >= HWTest_C_TempLow_Start + 5)
 		{
 			if (HWTest_C_TempLow_End >= HWTest_C_TempHigh + 5)		// Low = bottom detector, High = Top detector (Cooler)
 			{
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
-				{
-					HWTest_Result_C = 3;
-				}
+				//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");				
+				HWTest_Result_C = 3;				
 			}
 		}		
 		else
 		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: No Heater OR HW 2");
+			//if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: No Heater OR HW 2");
 			HWTest_Result_C = 0;
 		}
 		break;
 
 
 	case 20:
-		if (currentTemperature>300)
-		{
-			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "eTrap not connected  OR  Temperature sensor defective");
-		}
-		else
-		{
-			//  Check Results for HW 2: 
-			//	Test B: Heater HW 2 working,  Test A: Fuse ALWAYS ok,  Test C: HW 3 Heater NEVER working
-			if ((HWTest_Result_B == 2) && (HWTest_Result_A == 2) && (HWTest_Result_C == 0))
+			if (currentTemperature>= 400)
 			{
-				HWVersion = 2;
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 2 detected");
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "eTrap n.c. OR bad TempSensors");
 			}
-			//	test B: Heater defective,		Test A: Fuse always ok,	Test C:	HW 3 Heater NEVER working
-			if ((HWTest_Result_B == 0) && (HWTest_Result_A == 2) && (HWTest_Result_C == 0))
+			else
 			{
-				HWVersion = 2;	// BUT Heater defective or not connected
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 2 detected BUT Heater Cable disconnected or Heater defective!");
-			}
-			//-----------------------------------------------------------------------------------------------
+				//  Check Results for HW 2: 
+				//	Test B: Heater HW 2 working,  Test A: Fuse ALWAYS ok,  Test C: HW 3 Heater NEVER working
+				if ((HWTest_Result_B == 2) && (HWTest_Result_A == 2) && (HWTest_Result_C == 0))
+				{
+					HWVersion = 2;
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "HW 2");
+				}
+				//	test B: Heater defective,		Test A: Fuse always ok,	Test C:	HW 3 Heater NEVER working
+				if ((HWTest_Result_B == 0) && (HWTest_Result_A == 2) && (HWTest_Result_C == 0))
+				{
+					HWVersion = 2;	// BUT Heater defective or not connected
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "HW 2 (Htr n.c. or def.");
+				}
+				//-----------------------------------------------------------------------------------------------
 
-			//  Check Results for HW 3: 
-			//	Test C: Heater HW 3 working,  Test A: Fuse ok,  Test B: HW 2 Heater NEVER working
-			if ((HWTest_Result_C == 3) && (HWTest_Result_A == 3) && (HWTest_Result_B == 0))
-			{
-				HWVersion = 3;
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 3 detected");
-			}
-			//	Test C: Heater HW 3 defective,  Test A: Fuse ok,  Test B: HW 2 Heater NEVER working
-			if ((HWTest_Result_C == 0) && (HWTest_Result_A == 3) && (HWTest_Result_B == 0))
-			{
-				HWVersion = 3;	// But Heater defective  (Fuse ok)
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 3 detected BUT Heater Cable disconnected or Heater defective!");
+				//  Check Results for HW 3: 
+				//	Test C: Heater HW 3 working,  Test A: Fuse ok,  Test B: HW 2 Heater NEVER working
+				if ((HWTest_Result_C == 3) && (HWTest_Result_A == 3) && (HWTest_Result_B == 0))
+				{
+					HWVersion = 3;
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "HW 3");
+				}
+				//	Test C: Heater HW 3 defective,  Test A: Fuse ok,  Test B: HW 2 Heater NEVER working
+				if ((HWTest_Result_C == 0) && (HWTest_Result_A == 3) && (HWTest_Result_B == 0))
+				{
+					HWVersion = 3;	// But Heater defective  (Fuse ok)
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "HW 3 detected (Htr n.c. or def.");
 
 
-			}
-			//	Test C: Heater HW 3 defective,  Test A: Fuse OPEN,  Test B: HW 2 Heater NEVER working
-			if ((HWTest_Result_C == 3) && (HWTest_Result_A == 2) && (HWTest_Result_B == 0))
-			{
-				HWVersion = 3;	// But Fuse OPEN
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 3 detected, BUT Temperature Fuse is open!");
+				}
+				//	Test C: Heater HW 3 defective,  Test A: Fuse OPEN,  Test B: HW 2 Heater NEVER working
+				if ((HWTest_Result_C == 3) && (HWTest_Result_A == 2) && (HWTest_Result_B == 0))
+				{
+					HWVersion = 3;	// But Fuse OPEN
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "HW 3 (TempFuse open!");
+				}
+
+				if (HWVersion == 0)
+				{
+					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "NO defined Hardware version !");
+				}
 			}
 
+			// Finally set all Pins
+			// set all to Heating
+			if (HWVersion == 3)	
+			{	
+				PWMPin = pin_Heater_HW3;
+				digitalWrite(pin_Cooler_HW3, OFF);
+				pin_MoveToFront = pin_MoveToFront_HW3;
+				switch_HW3_MUX_Temp(LOW);			
+			}
+			if (HWVersion == 2) 
+			{
+				PWMPin = pin_Heater_HW2;
+				pin_MoveToFront = pin_MoveToFront_HW2;
+			}
+			// if all fails: Old version
 			if (HWVersion == 0)
 			{
-				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "NO defined Hardware version !");
+				PWMPin = pin_Heater_HW2;
+				pin_MoveToFront = pin_MoveToFront_HW2;
 			}
-		}
+		
+			interval_HWTest = 100000;
+			HWTest_Step = 100;
 		break;
-	
-
-	//	if (HWVersion == 3)		{
-	//		PWMPin = pin_HeaterV3;
-	//		switch_Pin_MuxTemp(LOW);
-	//	}
-	//	if (HWVersion == 2) {
-	//		PWMPin = pin_PWM_HW2;
-	//	}
-
-
-	//	interval_HWTest = 100000;
-	//	HWTest_Step = 100;
 
 		default:
 			if (HWTest_Step > 1000)		HWTest_Step = 100;		// prevent overflow
 			break;
-	}
-	
-
-
-
-	
+	}	
 }
 
-void switch_Pin_MuxTemp(int state)
+void switch_HW3_MUX_Temp(int state)
 {	state_MuxTemp = state;
 	digitalWrite(pin_MuxTemp, state_MuxTemp);
-
-	/*if (state_MuxTemp == HIGH)
-	{
-		cmdMessenger.sendCmd(0, " Mux HIGH ");
-	}
-	else
-	{
-		cmdMessenger.sendCmd(0, " Mux LOW ");
-	}*/
 
 	// reset for next average round
 	Average_count = 0;
@@ -639,7 +634,7 @@ void setup()
 	}
 
 
-	pinMode(pin_TRAP_Cool, dir_TRAP_Cool);		// Trap Cooling 
+	pinMode(pin_MoveToFront_HW2, dir_MoveToFront_HW2);		// Trap Cooling 
 		set_pin_TRAP_Cool_and_Consequences(OFF);
 	pinMode(pin_GC_Start, dir_GC_Start);		// pin_GC_Start
 
@@ -647,21 +642,24 @@ void setup()
 	// HW3 Addons
 	// MUX Temperature reading
 	pinMode(pin_MuxTemp, dir_MuxTemp);
+
 	// Heater PWM
-	state_HeaterV3 = OFF;
-	pinMode(pin_HeaterV3, dir_HeaterV3);
-	analogWrite(pin_HeaterV3, state_HeaterV3);
+	state_Heater_HW3 = OFF;
+	pinMode(pin_Heater_HW3, dir_Heater_HW3);
+	analogWrite(pin_Heater_HW3, state_Heater_HW3);
+
 	// Cooler PWM
-	state_CoolerV3 = OFF;
-	pinMode(pin_CoolerV3, dir_CoolerV3);
-	analogWrite(pin_CoolerV3, state_CoolerV3);
-	// Motors Move Cooler To Front
-	state_MoveToFront = OFF;
-	pinMode(pin_MoveToFront, dir_MoveToFront);
-	digitalWrite(pin_MoveToFront, state_MoveToFront);
+	state_Cooler_HW3 = OFF;
+	pinMode(pin_Cooler_HW3, dir_Cooler_HW3);
+	analogWrite(pin_Cooler_HW3, state_Cooler_HW3);
+
+	// Motor Moves Cooler To Front
+	state_CoolingPosition = OFF;
+	pinMode(pin_MoveToFront_HW3, dir_MoveToFront_HW3);
+	digitalWrite(pin_MoveToFront_HW3, state_CoolingPosition);
+
 	// Bi-Metall Temperatursicherung
 	pinMode(pin_FuseTemp, dir_FuseTemp);
-	//digitalWrite(pin_FuseTemp, HIGH);
 	state_FuseTemp = digitalRead(pin_FuseTemp);
 	
 	PWMPin = pin_LedBuiltIn;	// Use LED-pin as Heater-pin until we know the HW Version
@@ -753,7 +751,7 @@ void loop()
 		Millis_Htr = 0;
 	}
 
-	if (state_TRAP_Cool == OFF)					// Cooling only
+	if (state_CoolingPosition == OFF)					// Cooling only
 	{
 		Millis_CryoTimeout = 0;
 	}
@@ -1492,7 +1490,7 @@ void OnAskForReadbacks() {
 	cmdMessenger.sendCmdArg(state_GC_Prepare);
 	cmdMessenger.sendCmdArg(state_GC_Ready);
 	cmdMessenger.sendCmdArg(state_GC_Start);
-	cmdMessenger.sendCmdArg(state_TRAP_Cool);
+	cmdMessenger.sendCmdArg(state_CoolingPosition);
 	cmdMessenger.sendCmdArg(state_Prepare_2);
 
 	// Timers
@@ -1706,28 +1704,38 @@ void set_goalTemperature(float _newTemp)
 // Do the P I D stuff
 void update_pid()
 {	// all vars are global	
-	if (state_TRAP_Cool == OFF)					// Heating
-	{
-		HeaterBang_min = HeaterBang_min_Hot;
-	}
-	else
-	{											// Cooling
-		HeaterBang_min = HeaterBang_min_Cool;
-	}
-
 	error = 0;
 	p_error = 0;
 	i_error = 0;
 	correction_sum = 0;
 
-	if (currentTemperature > _max_temperature+20)
-	{	Millis_HeaterBang = 0;
-		_integral_sum = 0;
+	//if ( (currentTemperature > _max_temperature+20)  )
+	//{	Millis_HeaterBang = 0;
+	//	_integral_sum = 0;
+	//}
+	//else
+	//{
+		if (HWVersion == 3)
+		{
+			if (state_CoolingPosition == false)
+			{
+				error = (goalTemperature - currentTemperature);
+			}
+			else
+			{				
+				error = (abs(currentTemperature) - abs(goalTemperature));		// Peltier must COOL (not heat)						
+				if (currentTemperature < goalTemperature)
+				{
+					error = -1 * error;
+				}
+			}
+		}
+		else
+		{
+			// HW 2
+			error = (goalTemperature - currentTemperature);			// Peltier switching by HW
+		}
 
-	}
-	else
-	{	error = (goalTemperature - currentTemperature);
-			
 		if ( ( currentTemperature > 0 ) && ( _integral_on) )
 		{	
 			_integral_sum =	_integral_sum + error;	
@@ -1747,7 +1755,7 @@ void update_pid()
 		if (c < HeaterBang_min)		
 			c = HeaterBang_min;	
 		Millis_HeaterBang = c;
-	}
+	//}
 }
 
 //// For testing the heating Rate:
@@ -1815,12 +1823,11 @@ void updateSecurityIssues()
 	//// Care for Timeout for Peltier Cooler
 	if (!STATUS_CRYO_TIMEOUT_IGNORE)
 	{
-		if ( ( STATUS_WAIT_FOR_TEMP) && (state_TRAP_Cool==ON) && ( Millis_CryoTimeout > HW_Cryotimeout_Millis) )		// Cooling  and  too long
+		if ( ( STATUS_WAIT_FOR_TEMP) && (state_CoolingPosition==ON) && ( Millis_CryoTimeout > HW_Cryotimeout_Millis) )		// Cooling  and  too long
 			{	
 				STATUS_CRYO_TIMEOUT = true;
 			}
 	}
-
 }
 
 /* Converts PT1000 AND applies FIXed corrections */
@@ -1874,7 +1881,7 @@ void measure_Temperatures_from_PT1000()
 /* Do Temp Correction: CoolTemp=Raw ;  ALL others = FIXed Correction */
 void measure_Temperatures_from_PT1000_correctTemperature()
 {		
-	if ( ( state_TRAP_Cool == ON ) && ( STATUS_CYCLE_RUNNING == true) )	// Calc for COOL State
+	if ( ( state_CoolingPosition == ON ) && ( STATUS_CYCLE_RUNNING == true) )	// Calc for COOL State
 	{	currentTemperature = CurrentTemperatureRAW;
 	}
 	else
@@ -1976,7 +1983,7 @@ float get_pin_GC_Start()
 	return (float)state_GC_Start;
 }
 float get_pin_TRAP_Cool()
-{	return (float)state_TRAP_Cool;				// Is OUT, so return the var
+{	return (float)state_CoolingPosition;				// Is OUT, so return the var
 }
 void set_pin_GC_Ready(int state)
 {
@@ -2005,9 +2012,45 @@ void set_pin_GC_Ready(int state)
 	}
 }
 void set_pin_TRAP_Cool_and_Consequences(int state)
-{	state_TRAP_Cool = state;
-	if ( !FAKE_TEMPERATURE_AND_HEATERS )													// check FAKE_TEMPERATURE_AND_HEATERS
-		digitalWrite(pin_TRAP_Cool, state);
+{	state_CoolingPosition = state;
+
+	if (!FAKE_TEMPERATURE_AND_HEATERS)													// check FAKE_TEMPERATURE_AND_HEATERS
+	{	
+		if (HWVersion == 3)
+		{
+			
+			if (state_CoolingPosition == true)	// Cooler
+			{
+				digitalWrite(pin_MoveToFront, state_CoolingPosition);
+				switch_HW3_MUX_Temp(HIGH);
+				PWMPin = pin_Cooler_HW3;
+				digitalWrite(pin_Heater_HW3, OFF);
+			}
+			else
+			{	
+				digitalWrite(pin_MoveToFront, state_CoolingPosition);
+				// Heater
+				switch_HW3_MUX_Temp(LOW);
+				PWMPin = pin_Heater_HW3;
+				digitalWrite(pin_Cooler_HW3, OFF);
+			}
+		}
+		else
+		{
+			digitalWrite(pin_MoveToFront, state_CoolingPosition);
+			PWMPin = pin_Heater_HW2;
+		}
+
+	}
+
+	if (state_CoolingPosition == false)					// Heating
+	{
+		HeaterBang_min = HeaterBang_min_Hot;
+	}
+	else
+	{											// Cooling
+		HeaterBang_min = HeaterBang_min_Cool;
+	}
 
 	set_pid_limits();
 }
@@ -2041,7 +2084,7 @@ void reset_cycle_array()
 
 void set_pid_limits()
 {
-	if (state_TRAP_Cool == ON)
+	if (state_CoolingPosition == ON)
 	{
 		_min_temperature = HW_Minimum_Temperature_with_Cool;
 		_max_temperature = HW_Maximum_Temperature_with_Cool;

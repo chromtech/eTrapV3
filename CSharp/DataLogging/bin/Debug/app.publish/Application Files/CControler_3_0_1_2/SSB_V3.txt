@@ -1,0 +1,200 @@
+﻿SSB V3 13.1.2021
+
+C:\ Arduino projects\CmdMessenger\CmdMessenger\CSharp\CmdMessenger.sln
+C:\ Arduino projects\CmdMessenger\CmdMessenger\Examples\Data Logging\DataLogging.sln  bzw. DataLogging.sln
+
+
+- Datalogging ein-/ausschalten
+- Temperatur plotten
+		LM35 TempSensor view from flat side, left to right
+						1=4-20V     >>  Yell   27  5V
+						2=OUT		>>  green  19  A 7 (oder 0 ?)
+						3=GND		>>  blue   29  GND
+
+- Timer1 in Controler starten/stoppen und auslesen
+-    Timer Test 15 Stunden:  OK
+
+
+Analog In 7:   Über Spannungsteiler: VIn > 33k > A7 > 10k > GND 
+				12V > 2.7 V  am A7
+				5V  > 0.9 V  am A7
+
+
+- PID calculations  Im Prinzip OK.  PI Werte mit endgültiger Hardware anpassen
+
+-( PWM on D3 (Pin 4 GND  Pin 6 D3)	OBS V3 )
+- PWM on D4							Heizen Impuls
+- PWM on D5							Kühlen Impuls
+
+
+PT1000 Konverter Anschlüsse:
+	+12V:					+12 / GND
+	Benutzung Eingang S1:	MUX A und MUX B auf GND legen (=LOW)
+	Anschluß PT1000:		S1 / GND
+	Ausgang 0-6V:			Out / GND
+	Alle GND sind miteinander verbunden.
+
+	V3: 
+	D6:  MUX zum Umschalten der Kanäle S1 und ??
+
+Arduino Eingang für Analog 0-6 V
+	A7	= pin 19  (Beschriftung A0)		Yellow
+	GND	= pin 28						Green
+	AREF mit 3V3 verbinden für 3.3V Ref
+
+PT1000 Kalibrierung:
+	USED			
+	-50  > 0 mV		
+	350  > 3300 mV	
+	8.25x + 412.5		
+
+	-50C = 803.15  Ohm =>  0V
+	-30  = 882
+	-20  = 921
+
+	0.167 V		Output mit -30.059 C Wiederstand		= 0.882 kOhm
+	3.06  V		Output mit 347.95  C Wiederstand		= 3.29  kOhm
+
+
+TTL connections:
+	GC_Prepare		=	D12 IN				Active State: OFF = TTL low
+	GC_Ready		=	D11 OUT and IN		Active State: ON  = TTL high
+	GC_Start		=	D10 IN				Active State: OFF = TTL low
+	TRAP_Cool		=	D09 OUT				Active State: ON  = TTL high
+
+TTL connections since V2.0
+	Prepare_2		=	D8 IN				Active State: OFF = TTL low		PAL TTL OUT 3 (pin 6)
+	
+	Unused_IN_2		=	D7 IN												PAL TTL OUT 2 (pin 5)
+	Unused_IN_1		=	D6 IN												PAL TTL OUT 1 (pin 4)	
+	Unused_OUT_3	=	D5 OUT												PAL TTL IN 3 (pin 3)
+	Unused_OUT_2	=	D4 OUT												PAL TTL IN 2 (pin 2)
+	Unused_OUT_1	=	D2 OUT												PAL TTL IN 1 (pin 1)
+			
+	
+LED : D13 OUT
+
+
+eTrap Cycle:
+eTrap Program:  V 2.7 / 2.8
+Macro v 6.0
+// Cycle version 6	Line 4 added:  Wait for Prepare_2 Time.  If Prepare_2 Time >0: Do NOT run Line 5 !
+		0;		ATOM[Line] = SET_VARIABLE;		PARM1[Line] = PAL_INCUBATION_TIME;	PARM2[Line] = 45;		PARM3[Line] = 0;		// 0 
+		1;		ATOM[Line] = SWITCH_EVENT;		PARM1[Line] = TRAP_COOL;			PARM2[Line] = OFF;		PARM3[Line] = 0;		// 1 Security
+		2;		ATOM[Line] = SET_TEMP;			PARM1[Line] = 50;					PARM2[Line] = 99;		PARM3[Line] = 0;		// 2 Standby Temp
+		3;		ATOM[Line] = WAIT_SYNC_SIG;		PARM1[Line] = GC_PREPARE;			PARM2[Line] = OFF;		PARM3[Line] = 0;		// 3 Wait for GC Prepare
+
+		4;		ATOM[Line] = WAIT_TIMER;		PARM1[Line] = 0;					PARM2[Line] = 30;		PARM3[Line] = 0;		// 4 optional Prepare_2 Timer
+
+		4;		ATOM[Line] = WAIT_SYNC_SIG;		PARM1[Line] = PREPARE_2;			PARM2[Line] = OFF;		PARM3[Line] = 0;		// 4 5 Wait PREPARE_2 going low
+		5;		ATOM[Line] = SWITCH_EVENT;		PARM1[Line] = GC_READY;				PARM2[Line] = OFF;		PARM3[Line] = 0;		// 5 6 GC Ready to OFF		
+		6;		ATOM[Line] = SET_TEMP;			PARM1[Line] = 50;					PARM2[Line] = 99;		PARM3[Line] = 0;		// 6 7 Security Temp = Standby Temp Do NOT Wait
+		7;		ATOM[Line] = SWITCH_EVENT;		PARM1[Line] = TRAP_COOL;			PARM2[Line] = ON;		PARM3[Line] = 0;		// 7 8 Cool Trap ON
+		8;		ATOM[Line] = SET_TEMP;			PARM1[Line] = -5;					PARM2[Line] = 1;		PARM3[Line] = 0;		// 8 9 Low Temp
+		9;		ATOM[Line] = WAIT_TIMER;		PARM1[Line] = 0;					PARM2[Line] = 30;		PARM3[Line] = 0;		// 9 10 Pre Inject Low Time
+		10;		ATOM[Line] = SWITCH_EVENT;		PARM1[Line] = GC_READY;				PARM2[Line] = ON;		PARM3[Line] = 0;		// 10 11 Set GC to Ready
+		11;		ATOM[Line] = WAIT_SYNC_SIG;		PARM1[Line] = GC_START;				PARM2[Line] = OFF;		PARM3[Line] = 0;		// 11 12 Wait GC Start
+		12;		ATOM[Line] = WAIT_TIMER;		PARM1[Line] = 0;					PARM2[Line] = 5;		PARM3[Line] = 0;		// 12 13 Post Inject Low Time
+		13;		ATOM[Line] = SWITCH_EVENT;		PARM1[Line] = TRAP_COOL;			PARM2[Line] = OFF;		PARM3[Line] = 0;		// 13 14 Cool Trap OFF
+		14;		ATOM[Line] = SET_TEMP;			PARM1[Line] = 60;					PARM2[Line] = 1;		PARM3[Line] = 0;		// 14 15 High Temp
+		15;		ATOM[Line] = START_TIMER;		PARM1[Line] = 1;					PARM2[Line] = 0;		PARM3[Line] = 0;		// 15 16 Start Timer High Temp
+		16;		ATOM[Line] = WAIT_TIMER;		PARM1[Line] = 1;					PARM2[Line] = 90;		PARM3[Line] = 0;		// 16 17 Wait Timer High Temp Is already Started
+		17;		ATOM[Line] = END_OF_CYCLE;		PARM1[Line] = SINGLE_RUN_MODE;		PARM2[Line] = 0;		PARM3[Line] = 0;		// 17 18 End of Cycle AND SINGLE_RUN_MODE-flag in PARM1 default=true
+
+
+Versions:				
+version 2.8.2  for eTrap 2.8.2
+	19.10.2020	- Add STOP command from MH:
+					... sethook "IC_PostAcq", "eT_Abort" in User.mac
+					... eT_Send "Stop" in eTrap.mac
+
+			1. Initial Config File in C:\Chromtech\eTrap\Program   After  installation
+			2. Standard Config File in C:\Chromtech\eTrap\		 After first startup
+
+			- use and Unused are Method parameters now: 'eTrap In Use' 
+				- eTrap_In_Use will NOT be sent to Controler
+				- On Start a Method w/ eTrap_In_Use: Just no start is sent to controler
+			- CryoTimeout in Controler changed to ONLY be checked during cool down. NOt during wait start!
+			- Controler version 2.8.2.  
+			- Save macro in same Folder as method (in case of MH it was the method folder OR method)
+			- On Shutdown: Apply Heaters OFF!
+			- On Startup: Check if already runnning
+			- Add logging to MSD Logfile
+			- Add writing Parameters to acqmeth.txt  or  'methname'.INF
+
+version 2.8.3  for eTrap 2.8.2
+	2.12.2020	- removed bug: Not Writing Config File !!!
+				- each change of a configuration (Ignore GC Prep, Ingnore Prepare_2) will be saved in Config file immediately
+
+
+			
+Version 3.0
+	13.1.2021  switch SSB:  old: SSB.txt  NEW SSB_V3.txt
+	-	chg Version to 3.0.1
+	-	Add D6 MUX zum Umschalten der Tempkanäle Test: Umschaltung 1 x pro sekunde...
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+										
+
+O P E N
+BUG: Cryo Timeout Meldung geht nicht weg
+prinzipielles Problem:	PAL wartet auf GC ready go to LOW. 
+						Wenn eTrap hängt, dann ist GC-Ready IMMER low. Ausser im Cool-Down)
+
+
+5. Permament Alert on Method page, if Ignore Cryo Timeout is active
+6. Select own Cyro Timeout Times (with display in Method Page)
+- Ignore GC_Prepare hier einfügen und FW wertet entsprechend aus (Kompatibilität zu FW 1.8)
+7. EEPROM write/read ersetzen gegen get/put.  Get/Put schreiben nur, wenn der Wert ein anderer ist
+												Lebensdauer des EEPROM...
+
+
+
+
+Ändern des Cycle:
+DataLogging:	Do_CreateTrapCycle(),  Do_SendParms(changeVariables)
+ChartForm:		Do_DrawMethodLines()  directly called from  Form  ChartForm.eTrapDisplayBox
+Datenklasse:	Do_eTrapDisplayString
+
+eTrap Firmware:
+OnParmsToControler() case pChangeVariables
+eeRestoreCycle
+eeSaveCycle
+
+Build in Chromtech\eTrap						bzw.  Bruker\Peak Trap\:
+1.  in '5-DataLogging' Publish \ Publish Location eintragen:
+	C:\Chromtech\eTrap\program\					bzw.   C:\Bruker PeakTrap\Program\
+2.	in '5-DataLogging' Publish \ Install Mode and Settings \ Options-Button:
+	Description:
+	 Publisher Name:	Chromtech				bzw.	Bruker
+	 Suite Name:		eTrap Controler			bzw.	PeakTrap Controler
+	 Product Name:		eTrap Controler			bzw.	PeakTrap controler
+	
+3.	in '5-DataLogging' Application \  Assembly Information Button:
+	Title:		Chromtech Controler				bzw.	Bruker PeakTrap
+	Product:	Chromtech Controler				bzw.	Bruker PeakTrap
+	Copyright:	Copyright© Chromtech 2018		bzw.	Copyright 2018
+
+4.  in '5-DataLogging' Application \  Assembly Icon Browse Button:
+	Icon_rgb_neg.ico							bzw.	CmdMessenger\logo_rgb_300dpi.ico
