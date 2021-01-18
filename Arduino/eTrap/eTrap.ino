@@ -399,11 +399,18 @@ void Do_CheckHardwareVersions()
 
 	switch (HWTest_Step)
 	{
-	case 2:
+	case 1:
+		if (currentTemperature >= 300)
+		{
+			cmdMessenger.sendCmd(0, "Temperature ERROR");
+			HWTest_Step = 18;		// Skip more testing
+		}
+		break;
+	case 2:	
 		// Test B:
 		state_FuseTemp = digitalRead(pin_FuseTemp);
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Fuse State:");
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, state_FuseTemp);		
+		if (HWTest_Verbose) cmdMessenger.sendCmd(0, state_FuseTemp);
 		if (state_FuseTemp == LOW)
 		{
 			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: HW 2 detected  (OR HW 3 w/ open Fuse)");
@@ -421,15 +428,16 @@ void Do_CheckHardwareVersions()
 		switch_Pin_MuxTemp(LOW);
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Starting Test B...");
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temp =>");
+
 		break;
 	case 3:
 		HWTest_B_TempLow_Start = currentTemperature;
 		if (HWTest_Verbose) cmdMessenger.sendCmd(0, HWTest_B_TempLow_Start);
 		break;
 	case 6:
-		// switch on heater
-		if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 ON 2 seconds");
-		analogWrite(pin_PWM_HW2, 255);
+			// switch on heater
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater HW 2 ON for 2 seconds...");
+			analogWrite(pin_PWM_HW2, 255);
 		break;
 	case 8:
 		// switch off heater
@@ -484,12 +492,9 @@ void Do_CheckHardwareVersions()
 			if (HWTest_C_TempLow_End >= HWTest_C_TempHigh + 5)		// Low = bottom detector, High = Top detector (Cooler)
 			{
 				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
-
-				if (HWTest_Result_A == 2)
 				{
-					if (HWTest_Verbose) cmdMessenger.sendCmd(0, "        HW Version 3 with OPEN Fuse detected");
+					HWTest_Result_C = 3;
 				}
-				HWTest_Result_C = 3;
 			}
 		}		
 		else
@@ -499,42 +504,58 @@ void Do_CheckHardwareVersions()
 		}
 		break;
 
-	//case 16:
-	//	//  Check Results:
-	//	if ( (HWTest_Result_B == 2) )		// Fuse open (missing), heat up same temperatures
-	//	{
-	//		
-	//		if ((HWTest_B_TempLow + 5) <= HWTest_C_TempLow)			// Heater working
-	//		{
-	//			HWVersion = 2;
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A, B, Heater: HW Version 2 detected");
-	//		}
-	//		else
-	//		{
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A and B, no Heater: HW Version 2 detected, Heater not ok");
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater Cable disconnected?");
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Temperature Fuse open?");
-	//			HWVersion = 2;
-	//		}
-	//	}
-	//	else
-	//	{
-	//		if ( (HWTest_Result_C == 3))	// Fuse Closed (1), initial diff. Temps, heat up diff Temps
-	//		{
-	//			HWVersion = 3;
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test C: HW Version 3 detected");
-	//			if (HWTest_Result_A == 2) {
-	//				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A: Fuse OPEN");
-	//			}
-	//		}
-	//		else
-	//		{ 
-	//			HWVersion = 0;		// HW3: Fuse OPEN (Error), MUX not working, HW 3 Heater defective
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Test A, B, C: No consistant HW detected (HW Version 0)");
-	//			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Heater Cable disconnected?");
-	//		}
 
-	//	}
+	case 20:
+		if (currentTemperature>300)
+		{
+			if (HWTest_Verbose) cmdMessenger.sendCmd(0, "eTrap not connected  OR  Temperature sensor defective");
+		}
+		else
+		{
+			//  Check Results for HW 2: 
+			//	Test B: Heater HW 2 working,  Test A: Fuse ALWAYS ok,  Test C: HW 3 Heater NEVER working
+			if ((HWTest_Result_B == 2) && (HWTest_Result_A == 2) && (HWTest_Result_C == 0))
+			{
+				HWVersion = 2;
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 2 detected");
+			}
+			//	test B: Heater defective,		Test A: Fuse always ok,	Test C:	HW 3 Heater NEVER working
+			if ((HWTest_Result_B == 0) && (HWTest_Result_A == 2) && (HWTest_Result_C == 0))
+			{
+				HWVersion = 2;	// BUT Heater defective or not connected
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 2 detected BUT Heater Cable disconnected or Heater defective!");
+			}
+			//-----------------------------------------------------------------------------------------------
+
+			//  Check Results for HW 3: 
+			//	Test C: Heater HW 3 working,  Test A: Fuse ok,  Test B: HW 2 Heater NEVER working
+			if ((HWTest_Result_C == 3) && (HWTest_Result_A == 3) && (HWTest_Result_B == 0))
+			{
+				HWVersion = 3;
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 3 detected");
+			}
+			//	Test C: Heater HW 3 defective,  Test A: Fuse ok,  Test B: HW 2 Heater NEVER working
+			if ((HWTest_Result_C == 0) && (HWTest_Result_A == 3) && (HWTest_Result_B == 0))
+			{
+				HWVersion = 3;	// But Heater defective  (Fuse ok)
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 3 detected BUT Heater Cable disconnected or Heater defective!");
+
+
+			}
+			//	Test C: Heater HW 3 defective,  Test A: Fuse OPEN,  Test B: HW 2 Heater NEVER working
+			if ((HWTest_Result_C == 3) && (HWTest_Result_A == 2) && (HWTest_Result_B == 0))
+			{
+				HWVersion = 3;	// But Fuse OPEN
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "Hardware 3 detected, BUT Temperature Fuse is open!");
+			}
+
+			if (HWVersion == 0)
+			{
+				if (HWTest_Verbose) cmdMessenger.sendCmd(0, "NO defined Hardware version !");
+			}
+		}
+		break;
+	
 
 	//	if (HWVersion == 3)		{
 	//		PWMPin = pin_HeaterV3;
@@ -553,7 +574,7 @@ void Do_CheckHardwareVersions()
 			break;
 	}
 	
-	
+
 
 
 	
