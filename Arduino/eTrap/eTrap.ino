@@ -18,7 +18,7 @@ const int CycleVersion = 5;
 // HW version:  
 //	2 = standard 2.8    Ralf Controler	+	CT eTrap V1
 //  3 = V3				CT controler	+	CT eTrap V1
-int HWVersion = 0;				// 0 = Unchecked, Check real version at Startup
+int HWVersion = 0;				// 0 = Unchecked, Check real version at Startup		// Sent as Readback
 int HWTest_Step = 0;		// Used in Do_CheckHardwareVersions
 int HWTest_Result_A = 0;
 int HWTest_Result_B = 0;
@@ -204,7 +204,7 @@ const int pin_MuxTemp				= 4;	// D4 OUT = HW 3  MUX Temp
 const int dir_MuxTemp				= OUTPUT;
 	  int state_MuxTemp				= OFF;
 
-const int pin_FuseTemp				= 2;	// D2 IN = HW 3  Bi-Metall Temperatursicherung  
+const int pin_FuseTemp				= 2;	// D2 IN = HW 3  Bi-Metall Temperatursicherung  //  Sent as Readback !
 const int dir_FuseTemp				= INPUT;
 	  int state_FuseTemp			= OFF;
 
@@ -1471,17 +1471,15 @@ void OnAskForReadbacks() {
 	cmdMessenger.sendCmdArg(goalTemperature);
 	cmdMessenger.sendCmdArg(_min_temperature);
 	cmdMessenger.sendCmdArg(_max_temperature);
-	cmdMessenger.sendCmdArg(_proportional);
-	cmdMessenger.sendCmdArg(_integral);
+	cmdMessenger.sendCmdArg((float)HWVersion);				// 3.0: chg. _proportional  to  HW Version
+	cmdMessenger.sendCmdArg((float)state_FuseTemp);			// 3.0: chg. _integral to  state_FuseTemp
 
 	cmdMessenger.sendCmdArg((float)(Millis_HeaterBang-HeaterBang_min)/HeaterBang_max*100);
-	cmdMessenger.sendCmdArg(_integral_sum);
+	cmdMessenger.sendCmdArg(_integral_sum);			
 	cmdMessenger.sendCmdArg(HeaterIsOn);
 
 	cmdMessenger.sendCmdArg(TempCorrectionSlope);
-	//cmdMessenger.sendCmdArg(p_error);
-	cmdMessenger.sendCmdArg(heatUpSlope);		// GUI's unused 'HeatUpSlope'
-	//cmdMessenger.sendCmdArg(i_error);
+	cmdMessenger.sendCmdArg(heatUpSlope);			// GUI's unused 'HeatUpSlope'
 	cmdMessenger.sendCmdArg(CurrentTemperatureRAW);	// FW 2.3
 	
 	cmdMessenger.sendCmdArg(correction_sum);
@@ -1782,6 +1780,8 @@ void updateSecurityIssues()
 	bool _status_controler_is_on		=	false;
 	bool _status_gc_is_connected		=	true;
 	 
+	STATUS_SYSTEM_IS_SECURE = true;
+
 	if ( FAKE_TEMPERATURE_AND_HEATERS )
 	{
 		STATUS_SYSTEM_IS_SECURE		= true;
@@ -1790,6 +1790,7 @@ void updateSecurityIssues()
 		_status_controler_is_on		= true;
 		return;
 	}
+
 
 
 	// Get the Input Voltage (Pin 30, VIN, with Voltage Devider)
@@ -1809,6 +1810,12 @@ void updateSecurityIssues()
 	else
 		STATUS_SYSTEM_IS_SECURE = false;
 
+	// HW 3: OPEN Temp Fuse !
+	if (HWVersion == 3) {
+		if (state_FuseTemp == LOW) {
+			STATUS_SYSTEM_IS_SECURE = false;
+		}
+	}
 
 	//// Care for Timeout for Peltier Cooler
 	if (!STATUS_CRYO_TIMEOUT_IGNORE)
@@ -1818,6 +1825,8 @@ void updateSecurityIssues()
 				STATUS_CRYO_TIMEOUT = true;
 			}
 	}
+
+
 }
 
 /* Converts PT1000 AND applies FIXed corrections */
