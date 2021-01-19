@@ -652,9 +652,7 @@ namespace DataLogging
             if (COM.CurrentRequest == EDITMETHOD)        //|| (COM.CurrentRequest == START)
                 { ;}        // or after EDITMETHOD or START is closed by OK Button !
             else
-                COM.CurrentRequest = NO_REQUEST;
-            
-
+                COM.CurrentRequest = NO_REQUEST;          
         }
 
         public bool UseThisCOM(string name)
@@ -1027,8 +1025,14 @@ namespace DataLogging
                 Vars.currentGoalTemp = cmdReadback.ReadFloatArg();
                 Vars.pid_min_temperature = cmdReadback.ReadFloatArg();
                 Vars.pid_max_temperature = cmdReadback.ReadFloatArg();
-                Vars.pid_portional = cmdReadback.ReadFloatArg();
-                Vars.pid_integral = cmdReadback.ReadFloatArg();
+                // 3.0: changes
+                Vars.HWVersion = cmdReadback.ReadInt16Arg();    // chg .pid_portional to .HWVersion
+                Vars.FuseTemp = cmdReadback.ReadInt16Arg();     // chg .pid_integral to FuseTemp
+                if (Vars.HWVersion <= 2)
+                {  Vars.FuseTemp = 1;
+                }
+                //-------------
+
                 Vars.pid_duty_cycle = cmdReadback.ReadFloatArg();
                 Vars.pid_integral_sum = cmdReadback.ReadFloatArg();
                 Vars.heaterIsOn = cmdReadback.ReadInt16Arg();

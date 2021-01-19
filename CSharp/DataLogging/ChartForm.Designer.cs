@@ -23,7 +23,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabMethod = new System.Windows.Forms.TabPage();
             this.bttnHelpMethod = new System.Windows.Forms.Button();
-            this.lbl_eTrapNotConnected = new System.Windows.Forms.Label();
+            this.lblnotConnectedOrFuseTempBad = new System.Windows.Forms.Label();
             this.bttn_OK_tabMethod = new System.Windows.Forms.Button();
             this.label25 = new System.Windows.Forms.Label();
             this.bttn_MethStart = new System.Windows.Forms.Button();
@@ -149,6 +149,8 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.lbl_HWVersion = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabMethod.SuspendLayout();
             this.eTrapDisplayBox.SuspendLayout();
@@ -214,7 +216,7 @@
             // 
             this.tabMethod.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(165)))), ((int)(((byte)(250)))));
             this.tabMethod.Controls.Add(this.bttnHelpMethod);
-            this.tabMethod.Controls.Add(this.lbl_eTrapNotConnected);
+            this.tabMethod.Controls.Add(this.lblnotConnectedOrFuseTempBad);
             this.tabMethod.Controls.Add(this.bttn_OK_tabMethod);
             this.tabMethod.Controls.Add(this.label25);
             this.tabMethod.Controls.Add(this.bttn_MethStart);
@@ -249,20 +251,20 @@
             this.bttnHelpMethod.UseVisualStyleBackColor = false;
             this.bttnHelpMethod.Click += new System.EventHandler(this.bttnHelpMethod_Click);
             // 
-            // lbl_eTrapNotConnected
+            // lblnotConnectedOrFuseTempBad
             // 
-            this.lbl_eTrapNotConnected.AutoSize = true;
-            this.lbl_eTrapNotConnected.BackColor = System.Drawing.Color.Red;
-            this.lbl_eTrapNotConnected.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lbl_eTrapNotConnected.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_eTrapNotConnected.Location = new System.Drawing.Point(18, 11);
-            this.lbl_eTrapNotConnected.MinimumSize = new System.Drawing.Size(1120, 60);
-            this.lbl_eTrapNotConnected.Name = "lbl_eTrapNotConnected";
-            this.lbl_eTrapNotConnected.Size = new System.Drawing.Size(1120, 60);
-            this.lbl_eTrapNotConnected.TabIndex = 34;
-            this.lbl_eTrapNotConnected.Text = "1. Please close the software.  2. Verify that eTrap is switched ON.  3. Restart t" +
+            this.lblnotConnectedOrFuseTempBad.AutoSize = true;
+            this.lblnotConnectedOrFuseTempBad.BackColor = System.Drawing.Color.Red;
+            this.lblnotConnectedOrFuseTempBad.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblnotConnectedOrFuseTempBad.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblnotConnectedOrFuseTempBad.Location = new System.Drawing.Point(18, 11);
+            this.lblnotConnectedOrFuseTempBad.MinimumSize = new System.Drawing.Size(1120, 60);
+            this.lblnotConnectedOrFuseTempBad.Name = "lblnotConnectedOrFuseTempBad";
+            this.lblnotConnectedOrFuseTempBad.Size = new System.Drawing.Size(1120, 60);
+            this.lblnotConnectedOrFuseTempBad.TabIndex = 34;
+            this.lblnotConnectedOrFuseTempBad.Text = "1. Please close the software.  2. Verify that eTrap is switched ON.  3. Restart t" +
     "he software.";
-            this.lbl_eTrapNotConnected.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblnotConnectedOrFuseTempBad.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // bttn_OK_tabMethod
             // 
@@ -1522,6 +1524,8 @@
             // tabCommunication
             // 
             this.tabCommunication.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(165)))), ((int)(((byte)(250)))));
+            this.tabCommunication.Controls.Add(this.lbl_HWVersion);
+            this.tabCommunication.Controls.Add(this.label37);
             this.tabCommunication.Controls.Add(this.button1);
             this.tabCommunication.Controls.Add(this.label33);
             this.tabCommunication.Controls.Add(this.lbl_FWReqSubVersion);
@@ -1871,6 +1875,26 @@
             this.textBox1.TabIndex = 7;
             this.textBox1.Visible = false;
             // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label37.Location = new System.Drawing.Point(776, 179);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(154, 23);
+            this.label37.TabIndex = 46;
+            this.label37.Text = "eTrap Hardware:";
+            // 
+            // lbl_HWVersion
+            // 
+            this.lbl_HWVersion.AutoSize = true;
+            this.lbl_HWVersion.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_HWVersion.Location = new System.Drawing.Point(959, 179);
+            this.lbl_HWVersion.Name = "lbl_HWVersion";
+            this.lbl_HWVersion.Size = new System.Drawing.Size(130, 23);
+            this.lbl_HWVersion.TabIndex = 47;
+            this.lbl_HWVersion.Text = "lbl_HWVersion";
+            // 
             // ChartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -2008,7 +2032,7 @@
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Label lbl_SWVersion;
         private System.Windows.Forms.Label label25;
-        private System.Windows.Forms.Label lbl_eTrapNotConnected;
+        private System.Windows.Forms.Label lblnotConnectedOrFuseTempBad;
         private System.Windows.Forms.Button bttn_OK_tabMethod;
         private System.Windows.Forms.Button bttn_OK_tabStatus;
         private System.Windows.Forms.CheckBox chkBx_SingleRun;
@@ -2049,6 +2073,8 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label36;
         private System.Windows.Forms.CheckBox chkInUse;
+        private System.Windows.Forms.Label lbl_HWVersion;
+        private System.Windows.Forms.Label label37;
     }
 }
 

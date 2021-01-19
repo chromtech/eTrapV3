@@ -1321,6 +1321,34 @@ namespace DataLogging
             }
         }
 
+        //-----------------------------------------
+        // Hardware version 3.0:
+        // HW	2 = standard 3.0    Ralf Controler	+	CT eTrap V1
+        // HW   3 = V3				CT controler	+	CT eTrap V1
+        private int _HWVersion { get; set; }
+        public int HWVersion
+        {
+            get { return _HWVersion; }
+            set
+            {
+                _HWVersion= value;
+                NotifyPropertyChanged("hwversion");
+            }
+        }
+
+        private int _FuseTemp { get; set; }
+        public int FuseTemp
+        {
+            get { return _FuseTemp; }
+            set
+            {
+                _FuseTemp = value;
+                NotifyPropertyChanged("fusetemp");
+            }
+        }
+        // ----------------------------------------
+
+
         private int _CryoTimeout { get; set; }
         public int CryoTimeout
         {
@@ -1582,23 +1610,46 @@ namespace DataLogging
             get { return _pid_string; }
             set
             {
-                if (_heaterIsOn == 1) _pid_string = "Heater ON";
-                else _pid_string = "Heater off";
+                if (_HWVersion <=2)
+                {
+                    if (_heaterIsOn == 1) _pid_string = "Heater ON";
+                    else _pid_string = "Heater off";
 
-                _pid_string = _pid_string
-                            + "    " + _pid_duty_cycle.ToString("####0.0") + "%" + "\r\n"
-                            + "  PID Parameters:" + "\r\n"
-                            + "  Temperature  min =" + _pid_min_temperature.ToString("##0")
-                            + "   max =" + _pid_max_temperature.ToString("##0") + "\r\n"
-                            + "  proportional =" + _pid_portional.ToString("#000.0") + "\r\n"
-                            + "  integral =" + _pid_integral.ToString("####0.00")
-                            + "  integral sum =" + _pid_integral_sum.ToString("##000.0") + "\r\n"
-                            + "  duty cycle =" + _pid_duty_cycle.ToString("##000.0")
-                            + "  _slp =" + _error.ToString("####0.00") + "\r\n"
-                            + "  _hu_slp =" + _p_error.ToString("####0.00")
-                            + "  _r_tmp =" + _i_error.ToString("####0.0") + "\r\n"
-                            + "  _correction_sum =" + _correction_sum.ToString("#0000.0")
-                            ;
+                    _pid_string = _pid_string
+                                + "    " + _pid_duty_cycle.ToString("####0.0") + "%" + "\r\n"
+                                + "  PID Parameters:" + "\r\n"
+                                + "  Temperature  min =" + _pid_min_temperature.ToString("##0")
+                                + "   max =" + _pid_max_temperature.ToString("##0") + "\r\n"
+                                + "  Hardware version =" + _HWVersion.ToString("0") + "\r\n"
+                                + "  (Temperature Fuse=" + _FuseTemp.ToString("0") + ")"
+                                + "  integral sum =" + _pid_integral_sum.ToString("##000.0") + "\r\n"
+                                + "  duty cycle =" + _pid_duty_cycle.ToString("##000.0")
+                                + "  _slp =" + _error.ToString("####0.00") + "\r\n"
+                                + "  _hu_slp =" + _p_error.ToString("####0.00")
+                                + "  _r_tmp =" + _i_error.ToString("####0.0") + "\r\n"
+                                + "  _correction_sum =" + _correction_sum.ToString("#0000.0")
+                                ;
+                }
+                else
+                {
+                    if (_heaterIsOn == 1) _pid_string = "Heater ON";
+                    else _pid_string = "Heater off";
+
+                    _pid_string = _pid_string
+                                + "    " + _pid_duty_cycle.ToString("####0.0") + "%" + "\r\n"
+                                + "  PID Parameters:" + "\r\n"
+                                + "  Temperature  min =" + _pid_min_temperature.ToString("##0")
+                                + "   max =" + _pid_max_temperature.ToString("##0") + "\r\n"
+                                + "  Hardware version =" + _HWVersion.ToString("0") + "\r\n"
+                                + "  Temperature Fuse=" + _FuseTemp.ToString("0")
+                                + "  integral sum =" + _pid_integral_sum.ToString("##000.0") + "\r\n"
+                                + "  duty cycle =" + _pid_duty_cycle.ToString("##000.0")
+                                + "  _slp =" + _error.ToString("####0.00") + "\r\n"
+                                + "  _hu_slp =" + _p_error.ToString("####0.00")
+                                + "  _r_tmp =" + _i_error.ToString("####0.0") + "\r\n"
+                                + "  _correction_sum =" + _correction_sum.ToString("#0000.0")
+                                ;
+                }
                 NotifyPropertyChanged("pid_string");
             }
         }

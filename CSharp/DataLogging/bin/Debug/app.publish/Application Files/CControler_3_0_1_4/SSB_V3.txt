@@ -131,9 +131,10 @@ version 2.8.3  for eTrap 2.8.2
 Version 3.0
 	13.1.2021  switch SSB:  old: SSB.txt  NEW SSB_V3.txt
 	-	chg Version to 3.0.1
-	-	Add D6 MUX zum Umschalten der Tempkanäle Test: Umschaltung 1 x pro sekunde...
 
 
+	//	2 = standard 2.8    Ralf Controler	+	CT eTrap V1
+//  3 = V3				CT controler	+	CT eTrap V1
 
 	
 	

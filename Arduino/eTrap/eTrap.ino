@@ -1471,8 +1471,8 @@ void OnAskForReadbacks() {
 	cmdMessenger.sendCmdArg(goalTemperature);
 	cmdMessenger.sendCmdArg(_min_temperature);
 	cmdMessenger.sendCmdArg(_max_temperature);
-	cmdMessenger.sendCmdArg((float)HWVersion);				// 3.0: chg. _proportional  to  HW Version
-	cmdMessenger.sendCmdArg((float)state_FuseTemp);			// 3.0: chg. _integral to  state_FuseTemp
+	cmdMessenger.sendCmdArg(HWVersion);				// 3.0: chg. _proportional  to  HW Version
+	cmdMessenger.sendCmdArg(state_FuseTemp);			// 3.0: chg. _integral to  state_FuseTemp
 
 	cmdMessenger.sendCmdArg((float)(Millis_HeaterBang-HeaterBang_min)/HeaterBang_max*100);
 	cmdMessenger.sendCmdArg(_integral_sum);			

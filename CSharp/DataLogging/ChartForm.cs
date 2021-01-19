@@ -141,12 +141,11 @@ namespace DataLogging
                 this.ErrorString = "";
             }
 
-
             if ((!Vars.eTrapIsConnected) && (Vars.TimeSinceStartup > 60))
             {
-                lbl_eTrapNotConnected.BackColor = Color.Red;
-                lbl_eTrapNotConnected.Text = "eTrap disconnected or switched off! 1. Close software.  2. Verify eTrap is ON.  3. Restart software. ";
-                lbl_eTrapNotConnected.Visible = true;  
+                lblnotConnectedOrFuseTempBad.BackColor = Color.Red;
+                lblnotConnectedOrFuseTempBad.Text = "eTrap disconnected or switched off! 1. Close software.  2. Verify eTrap is ON.  3. Restart software. ";
+                lblnotConnectedOrFuseTempBad.Visible = true;  
             }
 
             /// After SW Start, we see a green Message if connected (for 4 sec)
@@ -158,13 +157,13 @@ namespace DataLogging
                 // If Connected Show Success for 4 sec
                 if (Vars.TimeSinceStartup < 5)
                 {
-                    lbl_eTrapNotConnected.BackColor = Color.LightGreen;
-                    lbl_eTrapNotConnected.Text = "Connected to eTrap.";
-                    lbl_eTrapNotConnected.Visible = true;
+                    lblnotConnectedOrFuseTempBad.BackColor = Color.LightGreen;
+                    lblnotConnectedOrFuseTempBad.Text = "Connected to eTrap.";
+                    lblnotConnectedOrFuseTempBad.Visible = true;
                 }
                 else
                 {
-                    lbl_eTrapNotConnected.Visible = false;
+                    lblnotConnectedOrFuseTempBad.Visible = false;
                 }
 
                 // if MassUnter: remove Form between 4 and 10 seconds after startup
@@ -178,9 +177,9 @@ namespace DataLogging
             }
             else
             {
-                    lbl_eTrapNotConnected.BackColor = Color.Red;
-                    lbl_eTrapNotConnected.Text = "1. Please close the software.  2. Verify eTrap is ON.  3. Restart software.";
-                    lbl_eTrapNotConnected.Visible = true;     
+                    lblnotConnectedOrFuseTempBad.BackColor = Color.Red;
+                    lblnotConnectedOrFuseTempBad.Text = "1. Please close the software.  2. Verify eTrap is ON.  3. Restart software.";
+                    lblnotConnectedOrFuseTempBad.Visible = true;     
             }
 
 
@@ -295,7 +294,7 @@ namespace DataLogging
             eTrapDisplayBox.Text = "PeakTrap Display";
             groupBox1.Text = "PeakTrap   Method             (default)";
             label12.Text = "PeakTrap Method:";
-            lbl_eTrapNotConnected.Text = "1. Please close the software.  2. Verify that PeakTrap is switched ON.  3. Restart the software.";
+            lblnotConnectedOrFuseTempBad.Text = "1. Please close the software.  2. Verify that PeakTrap is switched ON.  3. Restart the software.";
             this.Text = "Bruker PeakTrap";
             label25.Location = new Point(132, 44);
 
@@ -392,7 +391,7 @@ namespace DataLogging
                 // Top
                 lbl_MethodName.DataBindings.Add("Text", Vars, "method_ShortName");
                 lbl_MethodFileName.DataBindings.Add("Text", Vars, "method_FullPathAndFilename");
-                lbl_eTrapNotConnected.Visible = false;
+                lblnotConnectedOrFuseTempBad.Visible = false;
                 eTrapDisplayBox.DataBindings.Add("Text", Vars, "eTrapDisplayBoxString");
                 // Buttons
                 bttn_OK_tabMethod.Visible = false;
@@ -404,6 +403,7 @@ namespace DataLogging
                 lbl_SWVersion.DataBindings.Add("Text", Vars, "SoftwareVersionString");
                 lbl_FWReqMainVersion.DataBindings.Add("Text", Vars, "SoftwareMainVersionString");
                 lbl_FWReqSubVersion.DataBindings.Add("Text", Vars, "SoftwareSubVersionString");
+                lbl_HWVersion.DataBindings.Add("Text", Vars, "hwversion");
 
                 chkBx_TopLevelComm.CheckState = CheckState.Checked;
                 chkBx_LowLevelComm.CheckState = CheckState.Unchecked;
@@ -1169,11 +1169,15 @@ namespace DataLogging
 
         private void Do_UpdateStatusLabels()
         {
-            if ((Vars.eTrap_CryoMode == false) || (Vars.eTrapIsConnected == false))
+
+            if ((Vars.eTrap_CryoMode == false) || (Vars.eTrapIsConnected == false) || (Vars.FuseTemp == 0))
                 lbl_SingleRun.ForeColor = Color.Red;
             else
                 lbl_SingleRun.ForeColor = Color.Blue;
 
+            if ((Vars.FuseTemp == 0))
+                lbl_SingleRun.Text = "Peltier Overheat - Fuse open";
+            
 
             if (Vars.currentTempForDisplay == "Failed")
                 lbl_CurrentTemperature.ForeColor = Color.Red;
@@ -1185,6 +1189,8 @@ namespace DataLogging
                 lbl_ControlerStatus.ForeColor = Color.Red;
             else
                 lbl_ControlerStatus.ForeColor = Color.Black;
+
+            
 
         }
 
