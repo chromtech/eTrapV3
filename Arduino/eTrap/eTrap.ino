@@ -1709,39 +1709,29 @@ void update_pid()
 	i_error = 0;
 	correction_sum = 0;
 
-	//if ( (currentTemperature > _max_temperature+20)  )
-	//{	Millis_HeaterBang = 0;
-	//	_integral_sum = 0;
-	//}
-	//else
-	//{
+	if ( (currentTemperature > _max_temperature+20)  )
+	{	Millis_HeaterBang = 0;
+		_integral_sum = 0;
+	}
+	else
+	{
 		if (HWVersion == 3)
-		{
-			if (state_CoolingPosition == false)
-			{
-				error = (goalTemperature - currentTemperature);
+		{	if (state_CoolingPosition == false) {
+				error = goalTemperature - currentTemperature;
 			}
-			else
-			{				
-				error = (abs(currentTemperature) - abs(goalTemperature));		// Peltier must COOL (not heat)						
-				if (currentTemperature < goalTemperature)
-				{
-					error = -1 * error;
-				}
+			else {				
+				error = currentTemperature - goalTemperature;		// Peltier must COOL (not heat)			
 			}
 		}
-		else
-		{
+		else {			
 			// HW 2
 			error = (goalTemperature - currentTemperature);			// Peltier switching by HW
 		}
 
-		if ( ( currentTemperature > 0 ) && ( _integral_on) )
-		{	
+		if ((currentTemperature > 0) && ( _integral_on) )		{	
 			_integral_sum =	_integral_sum + error;	
 		}
-		else
-		{	
+		else		{	
 			_integral_sum = 0; 
 		}
 		
@@ -1755,7 +1745,7 @@ void update_pid()
 		if (c < HeaterBang_min)		
 			c = HeaterBang_min;	
 		Millis_HeaterBang = c;
-	//}
+	}
 }
 
 //// For testing the heating Rate:
